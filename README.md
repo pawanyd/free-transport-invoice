@@ -6,11 +6,13 @@ A client-side web application for generating professional bilty (consignment not
 
 - **User Authentication**: Secure login with session management
 - **Freight Details Entry**: Intuitive form for capturing shipment information
+- **List & Search**: View all freight records with search functionality
 - **Document Generation**: Create professional bilty and invoice documents
 - **PDF Export**: Download documents as print-ready PDFs
 - **eWay Bill Integration**: Include eWay bill information in documents
 - **Client-Side Storage**: All data stored locally in your browser using SQLite
 - **Offline Capable**: Works without an internet connection after initial load
+- **Navigation Menu**: Easy navigation between create and list pages
 
 ## Quick Start
 
@@ -115,6 +117,13 @@ After entering freight details:
 ### 5. Logout
 - Click the "Logout" button in the top right to end your session
 
+### 6. View All Records
+- Click "List Bilty / Invoices" in the navigation menu
+- View all your freight records in a table
+- Use the search box to filter records by origin, destination, goods, or ID
+- Click "Bilty" or "Invoice" to preview documents
+- Click 📄 or 📋 icons to download PDFs directly
+
 ## Browser Compatibility
 
 The application is tested and compatible with the latest versions of:
@@ -200,8 +209,12 @@ npm run test:coverage
 ### Project Structure
 ```
 transport-invoice-system/
-├── index.html              # Main application
+├── index.html              # Main application (create new freight)
+├── list-documents.html     # List all bilty/invoices
 ├── login.html              # Login page
+├── README.md               # This file
+├── package.json            # NPM dependencies
+├── jest.config.js          # Jest test configuration
 ├── assets/
 │   ├── css/
 │   │   └── styles.css     # Custom styles
@@ -214,8 +227,48 @@ transport-invoice-system/
 │   │   ├── ui-controller.js # UI coordination
 │   │   └── validator.js   # Form validation
 │   ├── images/            # Company branding assets
+│   │   ├── logo.svg
+│   │   ├── seal.svg
+│   │   └── signature.svg
 │   └── lib/               # Third-party libraries
-└── tests/                 # Test files
+│       ├── jspdf.umd.min.js
+│       ├── sql-wasm.js
+│       └── sql-wasm.wasm
+├── docs/                  # Documentation files
+│   ├── BROWSER-COMPATIBILITY-TEST.md
+│   ├── CHECKPOINT-10-SUMMARY.md
+│   ├── DEPLOYMENT-CHECKLIST.md
+│   ├── DEPLOYMENT-READY.md
+│   ├── E2E-TEST-SUMMARY.md
+│   ├── LIST-FEATURE-DOCUMENTATION.md
+│   ├── MANUAL-TESTING-CHECKLIST.md
+│   ├── OPTIMIZATION-NOTES.md
+│   ├── TASK-11-COMPLETION-SUMMARY.md
+│   ├── TASK-11-VERIFICATION.md
+│   └── TASK-15-COMPLETION-SUMMARY.md
+└── tests/                 # All test files
+    ├── README.md          # Test documentation
+    ├── html/              # HTML-based tests
+    │   ├── e2e-test-checklist.html
+    │   ├── manual-test.html
+    │   ├── test-complete-flow.html
+    │   ├── test-generator.html
+    │   ├── test-list-functionality.html
+    │   ├── test-pdf-exporter.html
+    │   ├── test-static-functionality.html
+    │   ├── test-subdirectory-paths.html
+    │   └── test-ui-controller.html
+    ├── scripts/           # Verification scripts
+    │   ├── e2e-automated-test.js
+    │   ├── verify-checkpoint.js
+    │   ├── verify-e2e.js
+    │   └── verify-static-deployment.js
+    ├── auth.test.js       # Jest unit tests
+    ├── datastore.test.js
+    ├── generator.test.js
+    ├── setup.test.js
+    ├── test-setup.js
+    └── validator.test.js
 ```
 
 ## Security Notes
