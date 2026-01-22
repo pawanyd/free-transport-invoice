@@ -348,6 +348,68 @@ class DataStoreManager {
   }
 
   /**
+   * Record document generation in history
+   */
+  recordDocumentGeneration(freightId, documentType) {
+    if (!this.initialized) {
+      return { success: false, error: 'Database not initialized' };
+    }
+
+    try {
+      const stmt = this.db.prepare(`
+        INSERT INTO document_history (freight_id, document_type) 
+        VALUES (?, ?)
+      `);
+
+      stmt.run([freightId, documentType]);
+      stmt.free();
+
+      this.persistToLocalStorage();
+
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to record document generation:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get document generation history for a freight record
+   */
+  getDocumentHistory(freightId) {
+    if (!this.initialized) {
+      return [];
+    }
+
+    try {
+      const stmt = this.db.prepare(`
+        SELECT * FROM document_history 
+        WHERE freight_id = ? 
+        ORDER BY generated_at DESC
+      `);
+
+      stmt.bind([freightId]);
+      
+      const history = [];
+      while (stmt.step()) {
+        const row = stmt.getAsObject();
+        history.push({
+          id: row.id,
+          freightId: row.freight_id,
+          documentType: row.document_type,
+          generatedAt: row.generated_at
+        });
+      }
+
+      stmt.free();
+      return history;
+    } catch (error) {
+      console.error('Failed to get document history:', error);
+      return [];
+    }
+  }
+
+  /**
    * Clear all data (for testing or user data reset)
    */
   clearAllData() {

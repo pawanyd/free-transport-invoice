@@ -356,6 +356,10 @@ export class UIController {
             return;
           }
           documents.bilty = bilty;
+          // Record in history
+          if (this.currentFreightId) {
+            this.dataStore.recordDocumentGeneration(this.currentFreightId, 'bilty');
+          }
           break;
 
         case 'invoice':
@@ -367,6 +371,10 @@ export class UIController {
             return;
           }
           documents.invoice = invoice;
+          // Record in history
+          if (this.currentFreightId) {
+            this.dataStore.recordDocumentGeneration(this.currentFreightId, 'invoice');
+          }
           break;
 
         case 'both':
@@ -379,6 +387,11 @@ export class UIController {
           }
           documents.bilty = both.bilty;
           documents.invoice = both.invoice;
+          // Record in history
+          if (this.currentFreightId) {
+            this.dataStore.recordDocumentGeneration(this.currentFreightId, 'bilty');
+            this.dataStore.recordDocumentGeneration(this.currentFreightId, 'invoice');
+          }
           break;
 
         default:

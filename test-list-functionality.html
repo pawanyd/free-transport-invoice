@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test List Functionality</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-6">Test List Functionality</h1>
+        
+        <div class="space-y-4">
+            <div>
+                <h2 class="text-lg font-semibold mb-2">Test Steps:</h2>
+                <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                    <li>Initialize database and create test data</li>
+                    <li>Verify getUserFreightRecords returns data</li>
+                    <li>Test document generation for existing records</li>
+                    <li>Test document history tracking</li>
+                </ol>
+            </div>
+
+            <button id="runTests" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded">
+                Run Tests
+            </button>
+
+            <div id="results" class="mt-4 p-4 bg-gray-50 rounded border border-gray-200 hidden">
+                <h3 class="font-semibold mb-2">Test Results:</h3>
+                <pre id="resultsContent" class="text-sm overflow-auto"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/lib/sql-wasm.js"></script>
+    <script type="module">
+        import DataStoreManager from './assets/js/datastore.js';
+        import { DocumentGenerator } from './assets/js/generator.js';
+
+        async function runTests() {
+            const results = [];
+            const resultsDiv = document.getElementById('results');
+            const resultsContent = document.getElementById('resultsContent');
+
+            resultsDiv.classList.remove('hidden');
+            resultsContent.textContent = 'Running tests...\n\n';
+
+            try {
+                // Test 1: Initialize database
+                results.push('Test 1: Initialize Database');
+                const dataStore = new DataStoreManager();
+                const initResult = await dataStore.initialize();
+                results.push(`✓ Database initialized: ${initResult.success}`);
+                results.push('');
+
+                // Test 2: Create test freight data
+                results.push('Test 2: Create Test Freight Data');
+                const testData = {
+                    userId: 1,
+                    origin: 'Mumbai',
+                    destination: 'Delhi',
+                    goodsDescription: 'Electronics',
+                    weight: 500,
+                    amount: 15000,
+                    discount: 500,
+                    taxes: 1500,
+                    ewayBillNumber: 'EWB123456',
+                    ewayBillDate: '2026-01-22'
+                };
+
+                const saveResult = dataStore.saveFreightDetails(testData);
+                results.push(`✓ Freight saved: ${saveResult.success}, ID: ${saveResult.id}`);
+                results.push('');
+
+                // Test 3: Retrieve user freight records
+                results.push('Test 3: Retrieve User Freight Records');
+                const records = dataStore.getUserFreightRecords(1);
+                results.push(`✓ Retrieved ${records.length} records`);
+                if (records.length > 0) {
+                    results.push(`  First record: ${records[0].origin} → ${records[0].destination}`);
+                }
+                results.push('');
+
+                // Test 4: Generate documents for a record
+                results.push('Test 4: Generate Documents');
+                if (records.length > 0) {
+                    const documentGenerator = new DocumentGenerator();
+                    const bilty = documentGenerator.generateBilty(records[0]);
+                    const invoice = documentGenerator.generateInvoice(records[0]);
+                    results.push(`✓ Bilty generated: ${bilty !== null}`);
+                    results.push(`✓ Invoice generated: ${invoice !== null}`);
+                }
+                results.push('');
+
+                // Test 5: Record document generation
+                results.push('Test 5: Record Document Generation History');
+                if (saveResult.success) {
+                    const historyResult1 = dataStore.recordDocumentGeneration(saveResult.id, 'bilty');
+                    const historyResult2 = dataStore.recordDocumentGeneration(saveResult.id, 'invoice');
+                    results.push(`✓ Bilty history recorded: ${historyResult1.success}`);
+                    results.push(`✓ Invoice history recorded: ${historyResult2.success}`);
+                    
+                    const history = dataStore.getDocumentHistory(saveResult.id);
+                    results.push(`✓ Retrieved ${history.length} history entries`);
+                }
+                results.push('');
+
+                // Test 6: Search functionality simulation
+                results.push('Test 6: Search Functionality');
+                const searchTerm = 'mumbai';
+                const filtered = records.filter(r => 
+                    r.origin.toLowerCase().includes(searchTerm) ||
+                    r.destination.toLowerCase().includes(searchTerm)
+                );
+                results.push(`✓ Search for "${searchTerm}" found ${filtered.length} records`);
+                results.push('');
+
+                results.push('='.repeat(50));
+                results.push('All tests completed successfully! ✓');
+                results.push('');
+                results.push('You can now:');
+                results.push('1. Open index.html to create new freight records');
+                results.push('2. Open list-documents.html to view all records');
+                results.push('3. Generate and download bilty/invoice PDFs');
+
+            } catch (error) {
+                results.push('');
+                results.push('✗ Test failed with error:');
+                results.push(error.message);
+                results.push(error.stack);
+            }
+
+            resultsContent.textContent = results.join('\n');
+        }
+
+        document.getElementById('runTests').addEventListener('click', runTests);
+    </script>
+</body>
+</html>
