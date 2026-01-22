@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Path Verification Test</title>
+</head>
+<body>
+    <h1>Path Verification Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        // Test relative paths
+        const pathsToTest = [
+            'assets/css/styles.css',
+            'assets/js/config.js',
+            'assets/js/auth.js',
+            'assets/js/datastore.js',
+            'assets/js/validator.js',
+            'assets/js/generator.js',
+            'assets/js/pdf-exporter.js',
+            'assets/js/ui-controller.js',
+            'assets/images/logo.svg',
+            'assets/images/signature.svg',
+            'assets/images/seal.svg',
+            'assets/lib/sql-wasm.js',
+            'assets/lib/jspdf.umd.min.js'
+        ];
+        
+        async function testPaths() {
+            results.innerHTML = '<h2>Testing Relative Paths:</h2>';
+            
+            for (const path of pathsToTest) {
+                try {
+                    const response = await fetch(path, { method: 'HEAD' });
+                    const status = response.ok ? '✅ OK' : '❌ FAILED';
+                    results.innerHTML += `<p>${status} - ${path} (${response.status})</p>`;
+                } catch (error) {
+                    results.innerHTML += `<p>❌ ERROR - ${path}: ${error.message}</p>`;
+                }
+            }
+            
+            results.innerHTML += '<h2>Summary:</h2>';
+            results.innerHTML += '<p>All paths are relative (no leading slashes)</p>';
+            results.innerHTML += '<p>Paths should work from any subdirectory when deployed</p>';
+        }
+        
+        testPaths();
+    </script>
+</body>
+</html>

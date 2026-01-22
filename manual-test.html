@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual Test - Core Functionality</title>
+</head>
+<body>
+  <h1>Manual Test - Core Data and Validation Logic</h1>
+  <div id="results"></div>
+
+  <script type="module">
+    import AuthManager from './assets/js/auth.js';
+    import DataStoreManager from './assets/js/datastore.js';
+    import FormValidator from './assets/js/validator.js';
+
+    const results = document.getElementById('results');
+    
+    function log(message, isError = false) {
+      const p = document.createElement('p');
+      p.textContent = message;
+      p.style.color = isError ? 'red' : 'green';
+      results.appendChild(p);
+    }
+
+    async function runTests() {
+      try {
+        // Test 1: Database Initialization
+        log('Test 1: Initializing database...');
+        const dataStore = new DataStoreManager();
+        const initResult = await dataStore.initialize();
+        if (initResult.success) {
+          log('✓ Database initialized successfully');
+        } else {
+          log('✗ Database initialization failed: ' + initResult.error, true);
+          return;
+        }
+
+        // Test 2: Authentication
+        log('\nTest 2: Testing authentication...');
+        const authManager = new AuthManager();
+        await authManager.initialize();
+        
+        const loginResult = await authManager.login('admin', 'admin123');
+        if (loginResult.success) {
+          log('✓ Login successful with default admin credentials');
+          log('  Session token: ' + loginResult.sessionToken.substring(0, 16) + '...');
+        } else {
+          log('✗ Login failed: ' + loginResult.error, true);
+          return;
+        }
+
+        // Test 3: Session validation
+        log('\nTest 3: Testing session validation...');
+        if (authManager.isAuthenticated()) {
+          log('✓ Session is active and valid');
+        } else {
+          log('✗ Session validation failed', true);
+        }
+
+        // Test 4: Form validation
+        log('\nTest 4: Testing form validation...');
+        const validator = new FormValidator();
+        
+        const validData = {
+          origin: 'Mumbai',
+          destination: 'Delhi',
+          goodsDescription: 'Electronics',
+          weight: 100,
+          amount: 5000,
+          discount: 100,
+          taxes: 900
+        };
+        
+        const validationResult = validator.validateFreightForm(validData);
+        if (validationResult.valid) {
+          log('✓ Valid form data passed validation');
+        } else {
+          log('✗ Valid form data failed validation', true);
+          log('  Errors: ' + JSON.stringify(validationResult.errors), true);
+        }
+
+        // Test 5: Invalid form validation
+        log('\nTest 5: Testing invalid form validation...');
+        const invalidData = {
+          origin: '',
+          destination: 'Delhi',
+          goodsDescription: 'Electronics',
+          weight: -10,
+          amount: 5000
+        };
+        
+        const invalidResult = validator.validateFreightForm(invalidData);
+        if (!invalidResult.valid && invalidResult.errors.length > 0) {
+          log('✓ Invalid form data correctly rejected');
+          log('  Errors detected: ' + invalidResult.errors.length);
+        } else {
+          log('✗ Invalid form data was not rejected', true);
+        }
+
+        // Test 6: Data storage
+        log('\nTest 6: Testing data storage...');
+        const freightData = {
+          userId: 1,
+          origin: 'Mumbai',
+          destination: 'Delhi',
+          goodsDescription: 'Electronics',
+          weight: 100,
+          amount: 5000,
+          discount: 100,
+          taxes: 900
+        };
+        
+        const saveResult = dataStore.saveFreightDetails(freightData);
+        if (saveResult.success) {
+          log('✓ Freight details saved successfully');
+          log('  Record ID: ' + saveResult.id);
+          
+          // Test 7: Data retrieval
+          log('\nTest 7: Testing data retrieval...');
+          const retrieved = dataStore.getFreightDetails(saveResult.id);
+          if (retrieved && retrieved.origin === 'Mumbai') {
+            log('✓ Freight details retrieved successfully');
+            log('  Origin: ' + retrieved.origin);
+            log('  Destination: ' + retrieved.destination);
+          } else {
+            log('✗ Failed to retrieve freight details', true);
+          }
+        } else {
+          log('✗ Failed to save freight details: ' + saveResult.error, true);
+        }
+
+        // Test 8: Logout
+        log('\nTest 8: Testing logout...');
+        authManager.logout();
+        if (!authManager.isAuthenticated()) {
+          log('✓ Logout successful, session terminated');
+        } else {
+          log('✗ Logout failed, session still active', true);
+        }
+
+        log('\n=== All core functionality tests completed ===');
+        
+      } catch (error) {
+        log('✗ Test failed with error: ' + error.message, true);
+        console.error(error);
+      }
+    }
+
+    runTests();
+  </script>
+</body>
+</html>

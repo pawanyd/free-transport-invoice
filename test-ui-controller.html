@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Controller Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold mb-4">UI Controller Test</h1>
+        
+        <div id="testResults" class="space-y-2">
+            <p class="text-gray-600">Running tests...</p>
+        </div>
+    </div>
+
+    <script src="assets/lib/sql-wasm.js"></script>
+    <script src="assets/lib/jspdf.umd.min.js"></script>
+    
+    <script type="module">
+      import UIController from './assets/js/ui-controller.js';
+      import AuthManager from './assets/js/auth.js';
+
+      const resultsDiv = document.getElementById('testResults');
+      
+      function addResult(message, success = true) {
+        const p = document.createElement('p');
+        p.className = success ? 'text-green-600' : 'text-red-600';
+        p.textContent = message;
+        resultsDiv.appendChild(p);
+      }
+
+      async function runTests() {
+        resultsDiv.innerHTML = '';
+        
+        try {
+          // Test 1: UIController can be instantiated
+          addResult('✓ UIController class imported successfully');
+          const uiController = new UIController();
+          addResult('✓ UIController instance created');
+
+          // Test 2: UIController has required methods
+          const requiredMethods = [
+            'init', 'setupEventListeners', 'handleFormSubmit',
+            'showDocumentPreview', 'handleGenerateDocument',
+            'showValidationErrors', 'showSuccessMessage',
+            'clearValidationErrors', 'handleLogout'
+          ];
+
+          let allMethodsExist = true;
+          for (const method of requiredMethods) {
+            if (typeof uiController[method] !== 'function') {
+              addResult(`✗ Missing method: ${method}`, false);
+              allMethodsExist = false;
+            }
+          }
+
+          if (allMethodsExist) {
+            addResult('✓ All required methods exist');
+          }
+
+          // Test 3: UIController has required properties
+          if (uiController.authManager && uiController.formValidator && 
+              uiController.dataStore && uiController.documentGenerator && 
+              uiController.pdfExporter) {
+            addResult('✓ All required module dependencies initialized');
+          } else {
+            addResult('✗ Some module dependencies missing', false);
+          }
+
+          // Test 4: Initialize UIController
+          await uiController.init();
+          if (uiController.initialized) {
+            addResult('✓ UIController initialized successfully');
+          } else {
+            addResult('✗ UIController initialization failed', false);
+          }
+
+          // Test 5: Test form data collection
+          const testData = uiController.collectFormData();
+          if (testData && typeof testData === 'object') {
+            addResult('✓ Form data collection works');
+          } else {
+            addResult('✗ Form data collection failed', false);
+          }
+
+          addResult('\n=== All tests completed ===');
+
+        } catch (error) {
+          addResult(`✗ Error: ${error.message}`, false);
+          console.error(error);
+        }
+      }
+
+      runTests();
+    </script>
+</body>
+</html>

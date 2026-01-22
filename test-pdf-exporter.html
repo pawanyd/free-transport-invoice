@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Exporter Test</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="bg-gray-100 p-8">
+  <h1 class="text-2xl font-bold mb-4">PDF Exporter Manual Test</h1>
+  <div id="results" class="mb-4"></div>
+  
+  <div class="space-y-4">
+    <button id="testSinglePDF" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+      Test Single PDF Export
+    </button>
+    <button id="testMultiplePDF" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+      Test Multiple PDF Export
+    </button>
+  </div>
+
+  <div id="testDocument" class="hidden mt-4"></div>
+
+  <script src="assets/lib/jspdf.umd.min.js"></script>
+  <script type="module">
+    import PDFExporter from './assets/js/pdf-exporter.js';
+    import DocumentGenerator from './assets/js/generator.js';
+
+    const results = document.getElementById('results');
+    
+    function log(message, isError = false) {
+      const p = document.createElement('p');
+      p.textContent = message;
+      p.style.color = isError ? 'red' : 'green';
+      results.appendChild(p);
+    }
+
+    // Sample freight data
+    const sampleFreight = {
+      id: 1,
+      origin: 'Mumbai, Maharashtra',
+      destination: 'Delhi, NCR',
+      goodsDescription: 'Electronic goods - Laptops and accessories',
+      weight: 150.5,
+      amount: 15000,
+      discount: 500,
+      taxes: 2700,
+      ewayBillNumber: 'EWB123456789012',
+      ewayBillDate: '2024-01-15'
+    };
+
+    // Initialize components
+    const pdfExporter = new PDFExporter();
+    const docGenerator = new DocumentGenerator();
+
+    // Test 1: Single PDF Export
+    document.getElementById('testSinglePDF').addEventListener('click', async () => {
+      try {
+        log('Test 1: Testing single PDF export...');
+        
+        // Generate a bilty document
+        const biltyDoc = docGenerator.generateBilty(sampleFreight);
+        
+        if (!biltyDoc) {
+          log('✗ Failed to generate bilty document', true);
+          return;
+        }
+        
+        log('✓ Bilty document generated');
+        
+        // Generate filename
+        const filename = pdfExporter.generateFilename('bilty', '001');
+        log('✓ Filename generated: ' + filename);
+        
+        // Export to PDF
+        await pdfExporter.exportToPDF(biltyDoc, filename);
+        log('✓ PDF export initiated - check your downloads!');
+        
+      } catch (error) {
+        log('✗ Test failed: ' + error.message, true);
+        console.error(error);
+      }
+    });
+
+    // Test 2: Multiple PDF Export
+    document.getElementById('testMultiplePDF').addEventListener('click', async () => {
+      try {
+        log('\nTest 2: Testing multiple PDF export...');
+        
+        // Generate both documents
+        const docs = docGenerator.generateBoth(sampleFreight);
+        
+        if (!docs.bilty || !docs.invoice) {
+          log('✗ Failed to generate documents', true);
+          return;
+        }
+        
+        log('✓ Both documents generated');
+        
+        // Prepare documents array
+        const documents = [
+          {
+            element: docs.bilty,
+            filename: pdfExporter.generateFilename('bilty', '001')
+          },
+          {
+            element: docs.invoice,
+            filename: pdfExporter.generateFilename('invoice', '001')
+          }
+        ];
+        
+        log('✓ Prepared ' + documents.length + ' documents for export');
+        
+        // Export multiple PDFs
+        await pdfExporter.exportMultipleToPDF(documents);
+        log('✓ Multiple PDF export completed - check your downloads!');
+        
+      } catch (error) {
+        log('✗ Test failed: ' + error.message, true);
+        console.error(error);
+      }
+    });
+
+    // Initial test - verify jsPDF is loaded
+    if (window.jspdf && window.jspdf.jsPDF) {
+      log('✓ jsPDF library loaded successfully');
+    } else {
+      log('✗ jsPDF library not found', true);
+    }
+
+    log('✓ PDFExporter class imported successfully');
+    log('✓ DocumentGenerator class imported successfully');
+    log('\nClick the buttons above to test PDF export functionality');
+  </script>
+</body>
+</html>

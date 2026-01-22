@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E2E Test Checklist - Transport Invoice System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .test-passed { background-color: #d1fae5; }
+    .test-failed { background-color: #fee2e2; }
+    .test-pending { background-color: #fef3c7; }
+  </style>
+</head>
+<body class="bg-gray-100 p-8">
+  <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">End-to-End Test Checklist</h1>
+    <p class="mb-6 text-gray-600">Use this checklist to manually verify all functionality of the Transport Invoice Management System.</p>
+
+    <div class="space-y-6">
+      <!-- Test 1: Authentication -->
+      <div class="border rounded-lg p-4 test-pending" id="test-1">
+        <h2 class="text-xl font-semibold mb-3">Test 1: User Authentication</h2>
+        <div class="space-y-2 ml-4">
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-1')">
+            <span>Navigate to login.html</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-1')">
+            <span>Try invalid credentials - should show error message</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-1')">
+            <span>Login with valid credentials (admin / admin123)</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-1')">
+            <span>Should redirect to index.html after successful login</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Test 2: Form Entry and Validation -->
+      <div class="border rounded-lg p-4 test-pending" id="test-2">
+        <h2 class="text-xl font-semibold mb-3">Test 2: Form Entry and Validation</h2>
+        <div class="space-y-2 ml-4">
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-2')">
+            <span>Try submitting empty form - should show validation errors</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-2')">
+            <span>Enter negative weight - should show error</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-2')">
+            <span>Enter zero amount - should show error</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-2')">
+            <span>Fill in all required fields with valid data</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-2')">
+            <span>Submit form - should show success message</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-2')">
+            <span>Document generation buttons should become enabled</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Test 3: Bilty Generation -->
+      <div class="border rounded-lg p-4 test-pending" id="test-3">
+        <h2 class="text-xl font-semibold mb-3">Test 3: Bilty Document Generation</h2>
+        <div class="space-y-2 ml-4">
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-3')">
+            <span>Click "Generate Bilty" button</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-3')">
+            <span>Bilty preview should appear with all freight details</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-3')">
+            <span>Verify company logo, signature, and seal are visible</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-3')">
+            <span>Verify all entered data appears correctly</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-3')">
+            <span>If eWay bill was entered, verify it appears in document</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Test 4: Invoice Generation -->
+      <div class="border rounded-lg p-4 test-pending" id="test-4">
+        <h2 class="text-xl font-semibold mb-3">Test 4: Invoice Document Generation</h2>
+        <div class="space-y-2 ml-4">
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-4')">
+            <span>Click "Generate Invoice" button</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-4')">
+            <span>Invoice preview should appear with all freight details</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-4')">
+            <span>Verify company logo, signature, and seal are visible</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-4')">
+            <span>Verify calculations are correct (amount - discount + taxes)</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-4')">
+            <span>Verify itemized charges breakdown is present</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Test 5: Combined Generation -->
+      <div class="border rounded-lg p-4 test-pending" id="test-5">
+        <h2 class="text-xl font-semibold mb-3">Test 5: Combined Document Generation</h2>
+        <div class="space-y-2 ml-4">
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-5')">
+            <span>Click "Generate Both" button</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-5')">
+            <span>Both bilty and invoice previews should appear</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-5')">
+            <span>Verify both documents contain identical freight information</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-5')">
+            <span>Verify separate download buttons for each document</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Test 6: PDF Export -->
+      <div class="border rounded-lg p-4 test-pending" id="test-6">
+        <h2 class="text-xl font-semibold mb-3">Test 6: PDF Export</h2>
+        <div class="space-y-2 ml-4">
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-6')">
+            <span>Click download button for bilty</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-6')">
+            <span>PDF should download with correct filename format</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-6')">
+            <span>Open PDF and verify all content is preserved</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-6')">
+            <span>Verify logos and images appear in PDF</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-6')">
+            <span>Repeat for invoice PDF</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Test 7: Data Persistence -->
+      <div class="border rounded-lg p-4 test-pending" id="test-7">
+        <h2 class="text-xl font-semibold mb-3">Test 7: Data Persistence Across Page Reloads</h2>
+        <div class="space-y-2 ml-4">
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-7')">
+            <span>After saving freight details, refresh the page (F5)</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-7')">
+            <span>Should remain logged in (session persists)</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-7')">
+            <span>Open browser console and check localStorage for session data</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-7')">
+            <span>Close browser tab and reopen - should still be logged in</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Test 8: Session Management -->
+      <div class="border rounded-lg p-4 test-pending" id="test-8">
+        <h2 class="text-xl font-semibold mb-3">Test 8: Session Management and Expiration</h2>
+        <div class="space-y-2 ml-4">
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-8')">
+            <span>Click logout button</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-8')">
+            <span>Should redirect to login page</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-8')">
+            <span>Try accessing index.html directly - should redirect to login</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-8')">
+            <span>Login again and verify session is created</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-8')">
+            <span>Open browser console and manually set session expiration to past date</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-8')">
+            <span>Refresh page - should redirect to login with expiration message</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Test 9: Error Handling -->
+      <div class="border rounded-lg p-4 test-pending" id="test-9">
+        <h2 class="text-xl font-semibold mb-3">Test 9: Error Handling</h2>
+        <div class="space-y-2 ml-4">
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-9')">
+            <span>Test validation errors display correctly with field highlighting</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-9')">
+            <span>Correct invalid field - error should clear</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-9')">
+            <span>Open browser console - no JavaScript errors should appear</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-9')">
+            <span>Try generating document before entering data - should show error</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Test 10: Browser Console Check -->
+      <div class="border rounded-lg p-4 test-pending" id="test-10">
+        <h2 class="text-xl font-semibold mb-3">Test 10: Browser Console Verification</h2>
+        <div class="space-y-2 ml-4">
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-10')">
+            <span>Open browser DevTools (F12)</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-10')">
+            <span>Check Console tab - no critical errors</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-10')">
+            <span>Check Network tab - all assets load successfully</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-10')">
+            <span>Check Application tab - localStorage contains session data</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" class="form-checkbox" onchange="updateTestStatus('test-10')">
+            <span>Verify SQLite database is initialized (check console logs)</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 p-4 bg-blue-50 rounded-lg">
+      <h3 class="font-semibold text-lg mb-2">Test Summary</h3>
+      <p id="summary" class="text-gray-700">Complete the tests above to verify all functionality.</p>
+    </div>
+
+    <div class="mt-6 flex gap-4">
+      <button onclick="resetTests()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+        Reset All Tests
+      </button>
+      <button onclick="printChecklist()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+        Print Checklist
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function updateTestStatus(testId) {
+      const testDiv = document.getElementById(testId);
+      const checkboxes = testDiv.querySelectorAll('input[type="checkbox"]');
+      const total = checkboxes.length;
+      const checked = Array.from(checkboxes).filter(cb => cb.checked).length;
+      
+      if (checked === 0) {
+        testDiv.className = testDiv.className.replace(/test-(passed|failed|pending)/, 'test-pending');
+      } else if (checked === total) {
+        testDiv.className = testDiv.className.replace(/test-(passed|failed|pending)/, 'test-passed');
+      } else {
+        testDiv.className = testDiv.className.replace(/test-(passed|failed|pending)/, 'test-pending');
+      }
+      
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const allTests = document.querySelectorAll('[id^="test-"]');
+      const passed = document.querySelectorAll('.test-passed').length;
+      const total = allTests.length;
+      
+      const summary = document.getElementById('summary');
+      summary.textContent = `Tests Completed: ${passed} / ${total}`;
+      
+      if (passed === total) {
+        summary.className = 'text-green-700 font-semibold';
+        summary.textContent += ' - All tests passed! ✓';
+      }
+    }
+
+    function resetTests() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => cb.checked = false);
+      
+      const tests = document.querySelectorAll('[id^="test-"]');
+      tests.forEach(test => {
+        test.className = test.className.replace(/test-(passed|failed|pending)/, 'test-pending');
+      });
+      
+      updateSummary();
+    }
+
+    function printChecklist() {
+      window.print();
+    }
+
+    // Initialize summary
+    updateSummary();
+  </script>
+</body>
+</html>

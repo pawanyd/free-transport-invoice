@@ -1,0 +1,112 @@
+/* Custom styles for Transport Invoice Management System */
+
+/* Print styles for documents */
+@media print {
+    body {
+        background: white;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+    
+    .document-container {
+        page-break-after: always;
+    }
+}
+
+/* Document preview styles */
+.document-container {
+    background: white;
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.document-header {
+    border-bottom: 2px solid #1f2937;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.document-footer {
+    border-top: 2px solid #1f2937;
+    padding-top: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* Form validation styles */
+.field-error {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2;
+}
+
+.error-message {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Loading spinner */
+.spinner {
+    border: 3px solid #f3f4f6;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Branding elements */
+.company-logo {
+    max-width: 150px;
+    height: auto;
+}
+
+.company-signature,
+.company-seal {
+    max-width: 100px;
+    height: auto;
+}
+
+/* Document table styles */
+.document-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+.document-table th,
+.document-table td {
+    border: 1px solid #d1d5db;
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.document-table th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+}
+
+/* Utility classes */
+.text-right {
+    text-align: right;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
