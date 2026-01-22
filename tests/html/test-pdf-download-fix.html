@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PDF Download Fix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../../assets/css/styles.css">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-6">Test PDF Download Fix</h1>
+        
+        <div class="space-y-4">
+            <div class="bg-blue-50 border border-blue-200 p-4 rounded">
+                <h2 class="font-semibold mb-2">Test Instructions:</h2>
+                <ol class="list-decimal list-inside space-y-2 text-sm">
+                    <li>Click "Generate Test Document" to create a sample document</li>
+                    <li>Click "Download as PDF" to test the PDF export</li>
+                    <li>Check if the PDF downloads successfully</li>
+                    <li>Open the PDF to verify it contains the document content</li>
+                </ol>
+            </div>
+
+            <div class="flex gap-4">
+                <button id="generateBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded">
+                    Generate Test Document
+                </button>
+                <button id="downloadBtn" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded hidden">
+                    Download as PDF
+                </button>
+            </div>
+
+            <div id="documentPreview" class="mt-6 border border-gray-300 rounded p-4 hidden">
+                <h3 class="font-semibold mb-4">Document Preview:</h3>
+                <div id="documentContent"></div>
+            </div>
+
+            <div id="status" class="mt-4 p-4 rounded hidden"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../assets/lib/sql-wasm.js"></script>
+    <script src="../../assets/lib/html2canvas.min.js"></script>
+    <script src="../../assets/lib/jspdf.umd.min.js"></script>
+    
+    <script type="module">
+        import { DocumentGenerator } from '../../assets/js/generator.js';
+        import { PDFExporter } from '../../assets/js/pdf-exporter.js';
+
+        let testDocument = null;
+        const documentGenerator = new DocumentGenerator();
+        const pdfExporter = new PDFExporter();
+
+        // Test freight data
+        const testFreightData = {
+            id: 12345,
+            origin: 'Mumbai',
+            destination: 'Delhi',
+            goodsDescription: 'Electronics and Computer Parts',
+            weight: 500,
+            amount: 15000,
+            discount: 500,
+            taxes: 1500,
+            ewayBillNumber: 'EWB123456789',
+            ewayBillDate: '2026-01-22'
+        };
+
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            try {
+                // Generate test document
+                testDocument = documentGenerator.generateBilty(testFreightData);
+                
+                if (testDocument) {
+                    // Show preview
+                    const preview = document.getElementById('documentPreview');
+                    const content = document.getElementById('documentContent');
+                    content.innerHTML = '';
+                    content.appendChild(testDocument.cloneNode(true));
+                    preview.classList.remove('hidden');
+                    
+                    // Show download button
+                    document.getElementById('downloadBtn').classList.remove('hidden');
+                    
+                    showStatus('Document generated successfully!', 'success');
+                } else {
+                    showStatus('Failed to generate document', 'error');
+                }
+            } catch (error) {
+                console.error('Generation error:', error);
+                showStatus('Error: ' + error.message, 'error');
+            }
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', async () => {
+            if (!testDocument) {
+                showStatus('Please generate a document first', 'error');
+                return;
+            }
+
+            try {
+                showStatus('Generating PDF... Please wait (this may take 10-15 seconds)', 'info');
+                
+                console.log('Starting PDF generation...');
+                console.log('Document element:', testDocument);
+                console.log('Document has content:', testDocument.innerHTML.length > 0);
+                
+                const filename = pdfExporter.generateFilename('test_bilty', testFreightData.id);
+                await pdfExporter.exportToPDF(testDocument, filename);
+                
+                showStatus('PDF downloaded successfully! Check your downloads folder.', 'success');
+            } catch (error) {
+                console.error('PDF export error:', error);
+                showStatus('PDF Export Error: ' + error.message, 'error');
+            }
+        });
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.classList.remove('hidden', 'bg-green-50', 'bg-red-50', 'bg-blue-50', 
+                                       'border-green-200', 'border-red-200', 'border-blue-200',
+                                       'text-green-700', 'text-red-700', 'text-blue-700');
+            
+            if (type === 'success') {
+                statusDiv.classList.add('bg-green-50', 'border', 'border-green-200', 'text-green-700');
+            } else if (type === 'error') {
+                statusDiv.classList.add('bg-red-50', 'border', 'border-red-200', 'text-red-700');
+            } else {
+                statusDiv.classList.add('bg-blue-50', 'border', 'border-blue-200', 'text-blue-700');
+            }
+            
+            statusDiv.textContent = message;
+        }
+    </script>
+</body>
+</html>

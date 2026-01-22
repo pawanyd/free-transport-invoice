@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple PDF Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-document {
+            background: white;
+            padding: 30px;
+            max-width: 800px;
+            margin: 20px auto;
+            border: 2px solid #333;
+        }
+        .header {
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .content {
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table td, table th {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f2f2f2;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple PDF Generation Test</h1>
+    
+    <button onclick="generatePDF()">Download as PDF</button>
+    
+    <div id="status" style="display:none;"></div>
+
+    <div id="testDocument" class="test-document">
+        <div class="header">
+            <h2>TEST DOCUMENT</h2>
+            <p>Document Number: 12345</p>
+            <p>Date: 2026-01-22</p>
+        </div>
+        
+        <div class="content">
+            <h3>Shipment Details</h3>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Origin</td>
+                    <td>Mumbai</td>
+                </tr>
+                <tr>
+                    <td>Destination</td>
+                    <td>Delhi</td>
+                </tr>
+                <tr>
+                    <td>Weight</td>
+                    <td>500 kg</td>
+                </tr>
+                <tr>
+                    <td>Amount</td>
+                    <td>₹15,000</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p><strong>This is a test document for PDF generation</strong></p>
+            <p>If you can see this text in the PDF, the generation is working correctly.</p>
+        </div>
+    </div>
+
+    <script src="../../assets/lib/html2canvas.min.js"></script>
+    <script src="../../assets/lib/jspdf.umd.min.js"></script>
+    
+    <script>
+        async function generatePDF() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.style.background = '#d1ecf1';
+            statusDiv.style.color = '#0c5460';
+            statusDiv.textContent = 'Generating PDF... Please wait';
+
+            try {
+                console.log('Starting PDF generation...');
+                
+                // Get the document element
+                const element = document.getElementById('testDocument');
+                console.log('Element found:', element);
+                console.log('Element has content:', element.innerHTML.length);
+
+                // Check libraries
+                console.log('html2canvas available:', typeof html2canvas);
+                console.log('jsPDF available:', typeof jspdf);
+
+                // Clone and prepare element
+                const clone = element.cloneNode(true);
+                clone.style.position = 'absolute';
+                clone.style.left = '-9999px';
+                clone.style.width = '800px';
+                clone.style.backgroundColor = '#ffffff';
+                document.body.appendChild(clone);
+
+                console.log('Capturing with html2canvas...');
+                
+                // Capture with html2canvas at lower scale for smaller file
+                const canvas = await html2canvas(clone, {
+                    scale: 1.5, // Reduced for smaller file size
+                    backgroundColor: '#ffffff',
+                    logging: true,
+                    width: 800,
+                    windowWidth: 800
+                });
+
+                console.log('Canvas created:', canvas.width, 'x', canvas.height);
+
+                // Remove clone
+                document.body.removeChild(clone);
+
+                // Create PDF
+                const { jsPDF } = jspdf;
+                const pdf = new jsPDF('portrait', 'mm', 'a4');
+                
+                // Use JPEG with compression for smaller file size
+                const imgData = canvas.toDataURL('image/jpeg', 0.85);
+                console.log('Image data length:', imgData.length);
+                
+                // A4 dimensions
+                const pageWidth = 210;
+                const pageHeight = 297;
+                const margin = 10;
+                const imgWidth = pageWidth - (2 * margin);
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                console.log('Image dimensions:', imgWidth, 'x', imgHeight);
+                
+                // If fits on one page
+                if (imgHeight <= (pageHeight - 2 * margin)) {
+                    pdf.addImage(imgData, 'JPEG', margin, margin, imgWidth, imgHeight);
+                } else {
+                    // Multiple pages - split properly
+                    const pageContentHeight = pageHeight - (2 * margin);
+                    const totalPages = Math.ceil(imgHeight / pageContentHeight);
+                    
+                    console.log('Total pages needed:', totalPages);
+                    
+                    for (let page = 0; page < totalPages; page++) {
+                        if (page > 0) {
+                            pdf.addPage();
+                        }
+                        
+                        const sourceY = page * pageContentHeight;
+                        const sourceHeight = Math.min(pageContentHeight, imgHeight - sourceY);
+                        
+                        // Create canvas for this page
+                        const pageCanvas = document.createElement('canvas');
+                        const pageCtx = pageCanvas.getContext('2d');
+                        
+                        const sourceYPixels = (sourceY / imgHeight) * canvas.height;
+                        const sourceHeightPixels = (sourceHeight / imgHeight) * canvas.height;
+                        
+                        pageCanvas.width = canvas.width;
+                        pageCanvas.height = sourceHeightPixels;
+                        
+                        pageCtx.drawImage(
+                            canvas,
+                            0, sourceYPixels, canvas.width, sourceHeightPixels,
+                            0, 0, canvas.width, sourceHeightPixels
+                        );
+                        
+                        const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.85);
+                        pdf.addImage(pageImgData, 'JPEG', margin, margin, imgWidth, sourceHeight);
+                    }
+                }
+                
+                // Save
+                pdf.save('test-document.pdf');
+                
+                statusDiv.style.background = '#d4edda';
+                statusDiv.style.color = '#155724';
+                statusDiv.textContent = 'PDF downloaded successfully!';
+                
+                console.log('PDF generation complete!');
+
+            } catch (error) {
+                console.error('Error:', error);
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

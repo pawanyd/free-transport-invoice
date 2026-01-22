@@ -6,6 +6,22 @@
     <title>List Bilty / Invoices - Transport Invoice Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        .animate-fade-out {
+            animation: fadeOut 0.3s ease-out;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div id="app" class="container mx-auto px-4 py-8">
@@ -107,6 +123,7 @@
 
     <!-- Scripts -->
     <script src="assets/lib/sql-wasm.js"></script>
+    <script src="assets/lib/html2canvas.min.js"></script>
     <script src="assets/lib/jspdf.umd.min.js"></script>
     
     <script type="module">
@@ -285,15 +302,23 @@
           const record = this.allRecords.find(r => r.id === recordId);
           if (!record) return;
 
+          // Show loading indicator
+          const loadingDiv = this.showLoadingOverlay('Generating Bilty PDF...');
+
           try {
             const bilty = this.documentGenerator.generateBilty(record);
             if (bilty) {
               const filename = this.pdfExporter.generateFilename('bilty', recordId);
               await this.pdfExporter.exportToPDF(bilty, filename);
+              this.showSuccessToast('Bilty PDF downloaded successfully!');
+            } else {
+              throw new Error('Failed to generate bilty document');
             }
           } catch (error) {
             console.error('Failed to download bilty:', error);
-            alert('Failed to download bilty PDF');
+            this.showErrorToast('Failed to download bilty PDF: ' + error.message);
+          } finally {
+            this.hideLoadingOverlay(loadingDiv);
           }
         }
 
@@ -301,15 +326,23 @@
           const record = this.allRecords.find(r => r.id === recordId);
           if (!record) return;
 
+          // Show loading indicator
+          const loadingDiv = this.showLoadingOverlay('Generating Invoice PDF...');
+
           try {
             const invoice = this.documentGenerator.generateInvoice(record);
             if (invoice) {
               const filename = this.pdfExporter.generateFilename('invoice', recordId);
               await this.pdfExporter.exportToPDF(invoice, filename);
+              this.showSuccessToast('Invoice PDF downloaded successfully!');
+            } else {
+              throw new Error('Failed to generate invoice document');
             }
           } catch (error) {
             console.error('Failed to download invoice:', error);
-            alert('Failed to download invoice PDF');
+            this.showErrorToast('Failed to download invoice PDF: ' + error.message);
+          } finally {
+            this.hideLoadingOverlay(loadingDiv);
           }
         }
 
@@ -357,8 +390,54 @@
           window.location.href = 'login.html';
         }
 
+        showLoadingOverlay(message = 'Loading...') {
+          const overlay = document.createElement('div');
+          overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+          overlay.id = 'loadingOverlay';
+          overlay.innerHTML = `
+            <div class="bg-white rounded-lg p-6 flex flex-col items-center">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+              <p class="text-gray-700 font-semibold">${message}</p>
+            </div>
+          `;
+          document.body.appendChild(overlay);
+          return overlay;
+        }
+
+        hideLoadingOverlay(overlay) {
+          if (overlay && overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+          }
+        }
+
+        showSuccessToast(message) {
+          this.showToast(message, 'success');
+        }
+
+        showErrorToast(message) {
+          this.showToast(message, 'error');
+        }
+
+        showToast(message, type = 'info') {
+          const toast = document.createElement('div');
+          const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+          toast.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in`;
+          toast.textContent = message;
+          document.body.appendChild(toast);
+
+          setTimeout(() => {
+            toast.classList.add('animate-fade-out');
+            setTimeout(() => {
+              if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+              }
+            }, 300);
+          }, 3000);
+        }
+
         showError(message) {
-          alert(message);
+          this.showErrorToast(message);
+          console.log(message);
         }
 
         escapeHtml(text) {

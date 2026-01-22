@@ -42,13 +42,43 @@ export class PDFExporter {
   }
 
   /**
+   * Apply computed styles inline to element and its children
+   * This ensures styles are preserved when rendering to canvas
+   */
+  applyComputedStyles(element) {
+    if (!element || element.nodeType !== 1) return;
+
+    // Get computed styles
+    const computedStyle = window.getComputedStyle(element);
+    
+    // Apply important styles inline
+    const importantStyles = [
+      'color', 'backgroundColor', 'fontSize', 'fontWeight', 
+      'fontFamily', 'textAlign', 'padding', 'margin',
+      'border', 'borderColor', 'borderWidth', 'borderStyle',
+      'display', 'width', 'height'
+    ];
+
+    importantStyles.forEach(prop => {
+      const value = computedStyle.getPropertyValue(prop);
+      if (value && value !== 'none' && value !== 'normal') {
+        element.style[prop] = value;
+      }
+    });
+
+    // Recursively apply to children
+    Array.from(element.children).forEach(child => {
+      this.applyComputedStyles(child);
+    });
+  }
+
+  /**
    * Export HTML document element to PDF
    * @param {HTMLElement} documentElement - The HTML element to convert to PDF
    * @param {string} filename - The filename for the downloaded PDF
    * @returns {Promise<void>} Promise that resolves when PDF is generated and downloaded
    */
   async exportToPDF(documentElement, filename) {
-    // Wrap PDF generation in try-catch
     try {
       // Validate inputs
       if (!documentElement) {
@@ -59,40 +89,126 @@ export class PDFExporter {
         throw new Error('Filename is required');
       }
 
-      // Check if jsPDF is available
+      // Check if libraries are available
       if (!window.jspdf || !window.jspdf.jsPDF) {
-        throw new Error('jsPDF library is not loaded');
+        throw new Error('jsPDF library is not loaded. Please refresh the page.');
       }
 
-      // Create new jsPDF instance
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({
-        orientation: this.options.orientation,
-        unit: this.options.unit,
-        format: this.options.format
-      });
+      if (!window.html2canvas) {
+        throw new Error('html2canvas library is not loaded. Please refresh the page.');
+      }
 
-      // Convert HTML to PDF using html() method
-      await pdf.html(documentElement, {
-        callback: function(doc) {
-          // Trigger browser download
-          doc.save(filename);
-        },
-        x: 10,
-        y: 10,
-        width: 190, // A4 width in mm minus margins
-        windowWidth: 800, // Virtual window width for rendering
-        html2canvas: {
-          scale: 0.5, // Scale for better quality
-          useCORS: true, // Enable CORS for images
-          logging: false
+      // Clone the element
+      const clonedElement = documentElement.cloneNode(true);
+
+      // Convert relative image paths to absolute URLs
+      const images = clonedElement.querySelectorAll('img');
+      images.forEach(img => {
+        if (img.src && !img.src.startsWith('http') && !img.src.startsWith('data:')) {
+          const absoluteUrl = new URL(img.src, window.location.href).href;
+          img.src = absoluteUrl;
         }
       });
 
+      // Apply computed styles inline
+      this.applyComputedStyles(clonedElement);
+
+      // Set wrapper styles
+      clonedElement.style.width = '800px';
+      clonedElement.style.padding = '20px';
+      clonedElement.style.backgroundColor = '#ffffff';
+      clonedElement.style.color = '#000000';
+      clonedElement.style.fontFamily = 'Arial, sans-serif';
+
+      // Temporarily append to body (hidden)
+      clonedElement.style.position = 'absolute';
+      clonedElement.style.left = '-9999px';
+      clonedElement.style.top = '0';
+      document.body.appendChild(clonedElement);
+
+      try {
+        // Capture with html2canvas at lower quality for smaller file size
+        const canvas = await window.html2canvas(clonedElement, {
+          scale: 1.5, // Reduced from 2 to 1.5 for smaller file size
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          width: 800,
+          windowWidth: 800
+        });
+
+        // Remove temporary element
+        document.body.removeChild(clonedElement);
+
+        // Create PDF
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('portrait', 'mm', 'a4');
+        
+        // Convert to JPEG instead of PNG for smaller file size
+        const imgData = canvas.toDataURL('image/jpeg', 0.85); // 85% quality
+        
+        // A4 dimensions
+        const pageWidth = 210;
+        const pageHeight = 297;
+        const margin = 10;
+        const imgWidth = pageWidth - (2 * margin);
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        // If content fits on one page, just add it
+        if (imgHeight <= (pageHeight - 2 * margin)) {
+          pdf.addImage(imgData, 'JPEG', margin, margin, imgWidth, imgHeight);
+        } else {
+          // Multiple pages needed - split content properly
+          const pageContentHeight = pageHeight - (2 * margin);
+          const totalPages = Math.ceil(imgHeight / pageContentHeight);
+          
+          for (let page = 0; page < totalPages; page++) {
+            if (page > 0) {
+              pdf.addPage();
+            }
+            
+            // Calculate the Y offset for this page
+            const sourceY = page * pageContentHeight;
+            const sourceHeight = Math.min(pageContentHeight, imgHeight - sourceY);
+            
+            // Create a temporary canvas for this page's content
+            const pageCanvas = document.createElement('canvas');
+            const pageCtx = pageCanvas.getContext('2d');
+            
+            // Calculate source dimensions in canvas pixels
+            const sourceYPixels = (sourceY / imgHeight) * canvas.height;
+            const sourceHeightPixels = (sourceHeight / imgHeight) * canvas.height;
+            
+            pageCanvas.width = canvas.width;
+            pageCanvas.height = sourceHeightPixels;
+            
+            // Draw only this page's portion
+            pageCtx.drawImage(
+              canvas,
+              0, sourceYPixels, canvas.width, sourceHeightPixels,
+              0, 0, canvas.width, sourceHeightPixels
+            );
+            
+            // Convert to JPEG and add to PDF
+            const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.85);
+            pdf.addImage(pageImgData, 'JPEG', margin, margin, imgWidth, sourceHeight);
+          }
+        }
+
+        // Save the PDF
+        pdf.save(filename);
+
+      } catch (canvasError) {
+        if (clonedElement.parentNode) {
+          document.body.removeChild(clonedElement);
+        }
+        throw canvasError;
+      }
+
     } catch (error) {
-      // On PDF error, log and throw with user-friendly message
       console.error('PDF generation error:', error);
-      throw new Error(`Failed to generate PDF. Please try again. ${error.message}`);
+      throw new Error(`Failed to generate PDF: ${error.message}`);
     }
   }
 
