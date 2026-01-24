@@ -3,7 +3,10 @@
  * Handles login, logout, session validation, and password hashing
  */
 
-import DataStoreManager from './datastore.js';
+import { APP_VERSION } from './version.js';
+
+// Dynamic import with version
+const DataStoreManager = (await import(`./datastore.js?v=${APP_VERSION}`)).default;
 
 class AuthManager {
   constructor() {

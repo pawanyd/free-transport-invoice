@@ -161,9 +161,12 @@
     
     <!-- Main application initialization -->
     <script type="module">
-      import AuthManager from './assets/js/auth.js';
-      import UIController from './assets/js/ui-controller.js';
-      import CityDropdown from './assets/js/city-dropdown.js';
+      import { APP_VERSION } from './assets/js/version.js';
+      
+      // Dynamic imports with version for cache busting
+      const AuthManager = (await import(`./assets/js/auth.js?v=${APP_VERSION}`)).default;
+      const UIController = (await import(`./assets/js/ui-controller.js?v=${APP_VERSION}`)).default;
+      const CityDropdown = (await import(`./assets/js/city-dropdown.js?v=${APP_VERSION}`)).default;
 
       // Check authentication on page load
       async function checkAuth() {

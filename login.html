@@ -50,7 +50,10 @@
     <script type="module" src="assets/js/datastore.js"></script>
     <script type="module" src="assets/js/auth.js"></script>
     <script type="module">
-        import AuthManager from './assets/js/auth.js';
+        import { APP_VERSION } from './assets/js/version.js';
+        
+        // Dynamic import with version for cache busting
+        const AuthManager = (await import(`./assets/js/auth.js?v=${APP_VERSION}`)).default;
         
         const authManager = new AuthManager();
         const loginForm = document.getElementById('loginForm');

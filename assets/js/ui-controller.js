@@ -4,11 +4,14 @@
  * Requirements: 2.1, 2.5, 4.4, 5.5, 6.3, 10.3, 10.5, 12.3
  */
 
-import AuthManager from './auth.js';
-import { FormValidator } from './validator.js';
-import DataStoreManager from './datastore.js';
-import { DocumentGenerator } from './generator.js';
-import { PDFExporter } from './pdf-exporter.js';
+import { APP_VERSION } from './version.js';
+
+// Dynamic imports with version
+const AuthManager = (await import(`./auth.js?v=${APP_VERSION}`)).default;
+const { FormValidator } = await import(`./validator.js?v=${APP_VERSION}`);
+const DataStoreManager = (await import(`./datastore.js?v=${APP_VERSION}`)).default;
+const { DocumentGenerator } = await import(`./generator.js?v=${APP_VERSION}`);
+const { PDFExporter } = await import(`./pdf-exporter.js?v=${APP_VERSION}`);
 
 /**
  * UIController class

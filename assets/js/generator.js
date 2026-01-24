@@ -4,7 +4,10 @@
  * Requirements: 4.1, 4.2, 5.1, 5.2, 5.3, 6.1, 8.1, 8.2, 8.3, 8.4, 8.5
  */
 
-import { DocumentConfig } from './config.js';
+import { APP_VERSION } from './version.js';
+
+// Dynamic import with version
+const { DocumentConfig } = await import(`./config.js?v=${APP_VERSION}`);
 
 /**
  * DocumentGenerator class

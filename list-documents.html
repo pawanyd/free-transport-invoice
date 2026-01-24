@@ -182,10 +182,13 @@
     <script src="assets/lib/jspdf.umd.min.js"></script>
     
     <script type="module">
-      import AuthManager from './assets/js/auth.js';
-      import DataStoreManager from './assets/js/datastore.js';
-      import { DocumentGenerator } from './assets/js/generator.js';
-      import { PDFExporter } from './assets/js/pdf-exporter.js';
+      import { APP_VERSION } from './assets/js/version.js';
+      
+      // Dynamic imports with version for cache busting
+      const AuthManager = (await import(`./assets/js/auth.js?v=${APP_VERSION}`)).default;
+      const DataStoreManager = (await import(`./assets/js/datastore.js?v=${APP_VERSION}`)).default;
+      const { DocumentGenerator } = await import(`./assets/js/generator.js?v=${APP_VERSION}`);
+      const { PDFExporter } = await import(`./assets/js/pdf-exporter.js?v=${APP_VERSION}`);
 
       class ListController {
         constructor() {
