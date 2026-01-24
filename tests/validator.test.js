@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach } from '@jest/globals';
 import { FormValidator } from '../assets/js/validator.js';
+import fc from 'fast-check';
 
 describe('FormValidator', () => {
   let validator;
@@ -194,6 +195,65 @@ describe('FormValidator', () => {
     test('rejects non-numeric strings', () => {
       const result = validator.validateNumeric('abc', 'weight');
       expect(result.valid).toBe(false);
+    });
+  });
+
+  // Property-Based Tests
+  describe('Property-Based Tests', () => {
+    // Feature: transport-invoice-system, Property 5: Required field validation
+    // Validates: Requirements 2.2
+    test('Property 5: Required field validation - any form with missing required fields should fail validation', () => {
+      fc.assert(
+        fc.property(
+          // Generate a subset of required fields (at least one missing)
+          fc.record({
+            origin: fc.option(fc.string({ minLength: 1, maxLength: 100 }), { nil: undefined }),
+            destination: fc.option(fc.string({ minLength: 1, maxLength: 100 }), { nil: undefined }),
+            goodsDescription: fc.option(fc.string({ minLength: 1, maxLength: 200 }), { nil: undefined }),
+            weight: fc.option(fc.float({ min: Math.fround(0.1), max: Math.fround(10000), noNaN: true }), { nil: undefined }),
+            amount: fc.option(fc.float({ min: Math.fround(0.1), max: Math.fround(1000000), noNaN: true }), { nil: undefined })
+          }).filter(formData => {
+            // Ensure at least one required field is missing
+            const requiredFields = ['origin', 'destination', 'goodsDescription', 'weight', 'amount'];
+            return requiredFields.some(field => 
+              formData[field] === undefined || 
+              formData[field] === null || 
+              formData[field] === ''
+            );
+          }),
+          (formData) => {
+            const result = validator.validateFreightForm(formData);
+            
+            // Validation should fail
+            expect(result.valid).toBe(false);
+            
+            // Should have at least one error
+            expect(result.errors.length).toBeGreaterThan(0);
+            
+            // Check that all missing required fields are identified
+            const requiredFields = ['origin', 'destination', 'goodsDescription', 'weight', 'amount'];
+            const missingFields = requiredFields.filter(field => 
+              formData[field] === undefined || 
+              formData[field] === null || 
+              formData[field] === ''
+            );
+            
+            // Each missing field should have an error
+            missingFields.forEach(missingField => {
+              const hasError = result.errors.some(error => error.field === missingField);
+              expect(hasError).toBe(true);
+            });
+            
+            // Error messages should indicate the field is required
+            result.errors.forEach(error => {
+              if (missingFields.includes(error.field)) {
+                expect(error.message).toContain('required');
+              }
+            });
+          }
+        ),
+        { numRuns: 100 }
+      );
     });
   });
 });

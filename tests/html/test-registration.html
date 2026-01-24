@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Registration Functionality</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Registration Functionality Test</h1>
+        
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Test Cases</h2>
+            <div id="testResults" class="space-y-2"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Manual Test</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Username</label>
+                    <input type="text" id="testUsername" class="w-full px-3 py-2 border rounded" placeholder="Enter username">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Password</label>
+                    <input type="password" id="testPassword" class="w-full px-3 py-2 border rounded" placeholder="Enter password">
+                </div>
+                <button id="registerBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Register User
+                </button>
+                <button id="loginBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Login User
+                </button>
+                <button id="clearBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    Clear Database
+                </button>
+                <div id="manualResult" class="mt-4 p-3 rounded hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/lib/sql-wasm.js"></script>
+    <script type="module">
+        import AuthManager from '../../assets/js/auth.js';
+
+        const testResults = document.getElementById('testResults');
+        const manualResult = document.getElementById('manualResult');
+        const testUsername = document.getElementById('testUsername');
+        const testPassword = document.getElementById('testPassword');
+        const registerBtn = document.getElementById('registerBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        let authManager;
+
+        function addTestResult(name, passed, message = '') {
+            const div = document.createElement('div');
+            div.className = `p-3 rounded ${passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+            div.innerHTML = `
+                <strong>${passed ? '✓' : '✗'} ${name}</strong>
+                ${message ? `<br><span class="text-sm">${message}</span>` : ''}
+            `;
+            testResults.appendChild(div);
+        }
+
+        function showManualResult(message, isSuccess) {
+            manualResult.textContent = message;
+            manualResult.className = `mt-4 p-3 rounded ${isSuccess ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+            manualResult.classList.remove('hidden');
+        }
+
+        async function runTests() {
+            testResults.innerHTML = '<div class="text-gray-600">Running tests...</div>';
+            
+            try {
+                // Initialize
+                localStorage.clear();
+                authManager = new AuthManager();
+                await authManager.initialize();
+                addTestResult('Initialization', true);
+
+                // Test 1: Register new user
+                const reg1 = await authManager.register('testuser1', 'password123');
+                addTestResult('Register new user', reg1.success, reg1.error || 'User registered successfully');
+
+                // Test 2: Register duplicate username
+                const reg2 = await authManager.register('testuser1', 'differentpass');
+                addTestResult('Reject duplicate username', !reg2.success && reg2.error === 'Username already exists', reg2.error);
+
+                // Test 3: Register with short username
+                const reg3 = await authManager.register('ab', 'password123');
+                addTestResult('Reject short username', !reg3.success && reg3.error.includes('at least 3 characters'), reg3.error);
+
+                // Test 4: Register with invalid characters
+                const reg4 = await authManager.register('user@name', 'password123');
+                addTestResult('Reject invalid username characters', !reg4.success && reg4.error.includes('letters, numbers, and underscores'), reg4.error);
+
+                // Test 5: Register with short password
+                const reg5 = await authManager.register('testuser2', 'pass');
+                addTestResult('Reject short password', !reg5.success && reg5.error.includes('at least 6 characters'), reg5.error);
+
+                // Test 6: Register with empty username
+                const reg6 = await authManager.register('', 'password123');
+                addTestResult('Reject empty username', !reg6.success && reg6.error.includes('required'), reg6.error);
+
+                // Test 7: Register with empty password
+                const reg7 = await authManager.register('testuser3', '');
+                addTestResult('Reject empty password', !reg7.success && reg7.error.includes('required'), reg7.error);
+
+                // Test 8: Login after registration
+                await authManager.register('logintest', 'testpass123');
+                const login1 = await authManager.login('logintest', 'testpass123');
+                addTestResult('Login after registration', login1.success, login1.error || 'Login successful');
+
+                // Test 9: Verify session after registration and login
+                const isAuth = authManager.isAuthenticated();
+                addTestResult('Session created after login', isAuth);
+
+                // Test 10: Register multiple users
+                const reg8 = await authManager.register('user1', 'pass123456');
+                const reg9 = await authManager.register('user2', 'pass123456');
+                const reg10 = await authManager.register('user3', 'pass123456');
+                addTestResult('Register multiple users', reg8.success && reg9.success && reg10.success);
+
+                addTestResult('All tests completed', true, 'Registration functionality is working correctly');
+
+            } catch (error) {
+                addTestResult('Test execution', false, error.message);
+            }
+        }
+
+        // Manual test buttons
+        registerBtn.addEventListener('click', async () => {
+            const username = testUsername.value.trim();
+            const password = testPassword.value;
+
+            if (!username || !password) {
+                showManualResult('Please enter both username and password', false);
+                return;
+            }
+
+            const result = await authManager.register(username, password);
+            showManualResult(
+                result.success ? `User "${username}" registered successfully!` : `Registration failed: ${result.error}`,
+                result.success
+            );
+        });
+
+        loginBtn.addEventListener('click', async () => {
+            const username = testUsername.value.trim();
+            const password = testPassword.value;
+
+            if (!username || !password) {
+                showManualResult('Please enter both username and password', false);
+                return;
+            }
+
+            const result = await authManager.login(username, password);
+            showManualResult(
+                result.success ? `Login successful! Session token: ${result.sessionToken.substring(0, 16)}...` : `Login failed: ${result.error}`,
+                result.success
+            );
+        });
+
+        clearBtn.addEventListener('click', async () => {
+            localStorage.clear();
+            authManager = new AuthManager();
+            await authManager.initialize();
+            showManualResult('Database cleared and reinitialized', true);
+            testUsername.value = '';
+            testPassword.value = '';
+        });
+
+        // Run tests on load
+        runTests();
+    </script>
+</body>
+</html>

@@ -181,6 +181,56 @@ class AuthManager {
       return null;
     }
   }
+
+  /**
+   * Register a new user
+   * @param {string} username - Username (must be unique)
+   * @param {string} password - Plain text password
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async register(username, password) {
+    try {
+      // Validate inputs
+      if (!username || !password) {
+        return { success: false, error: 'Username and password are required' };
+      }
+
+      // Validate username format
+      if (username.length < 3) {
+        return { success: false, error: 'Username must be at least 3 characters long' };
+      }
+
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        return { success: false, error: 'Username can only contain letters, numbers, and underscores' };
+      }
+
+      // Validate password strength
+      if (password.length < 6) {
+        return { success: false, error: 'Password must be at least 6 characters long' };
+      }
+
+      // Hash the password
+      const passwordHash = await this.hashPassword(password);
+
+      // Save user to database
+      const result = await this.dataStore.saveUser(username, passwordHash);
+
+      if (!result.success) {
+        return { success: false, error: result.error };
+      }
+
+      console.log(`User registered successfully: ${username}`);
+      return { success: true };
+    } catch (error) {
+      console.error('Registration failed:', error);
+      
+      if (error.message.includes('already exists')) {
+        return { success: false, error: 'Username already exists' };
+      }
+      
+      return { success: false, error: 'Registration failed. Please try again.' };
+    }
+  }
 }
 
 // Export as ES6 module

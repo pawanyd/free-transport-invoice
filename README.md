@@ -4,7 +4,8 @@ A client-side web application for generating professional bilty (consignment not
 
 ## Features
 
-- **User Authentication**: Secure login with session management
+- **User Authentication**: Secure login and registration with session management
+- **User Registration**: Create new accounts with username/password validation
 - **Freight Details Entry**: Intuitive form for capturing shipment information
 - **List & Search**: View all freight records with search functionality
 - **Document Generation**: Create professional bilty and invoice documents
@@ -43,9 +44,9 @@ A client-side web application for generating professional bilty (consignment not
    ```
    Then open `http://localhost:8000` in your browser
 
-3. **Login with default credentials**
-   - Username: `admin`
-   - Password: `admin123`
+3. **Login or Register**
+   - Default credentials: Username `admin`, Password `admin123`
+   - Or click "Register here" to create a new account
 
 ### Deploying to GitHub Pages
 
@@ -86,10 +87,20 @@ A client-side web application for generating professional bilty (consignment not
 
 ## Usage Guide
 
-### 1. Login
-- Open the application and you'll be directed to the login page
-- Enter your credentials (default: admin / admin123)
+### 1. Register or Login
+
+**For New Users:**
+- Click "Register here" on the login page
+- Choose a username (at least 3 characters, letters, numbers, and underscores only)
+- Choose a password (at least 6 characters)
+- Confirm your password
+- Click "Register" to create your account
+- You'll be redirected to the login page
+
+**For Existing Users:**
+- Enter your username and password
 - Click "Login" to access the main application
+- Default credentials: admin / admin123
 
 ### 2. Enter Freight Details
 Fill in the form with shipment information:
@@ -212,6 +223,7 @@ transport-invoice-system/
 ├── index.html              # Main application (create new freight)
 ├── list-documents.html     # List all bilty/invoices
 ├── login.html              # Login page
+├── register.html           # User registration page
 ├── README.md               # This file
 ├── package.json            # NPM dependencies
 ├── jest.config.js          # Jest test configuration
@@ -274,10 +286,13 @@ transport-invoice-system/
 ## Security Notes
 
 - Passwords are hashed using SHA-256 before storage
+- Username validation: minimum 3 characters, alphanumeric and underscores only
+- Password validation: minimum 6 characters
+- Duplicate usernames are prevented
 - Sessions expire after 24 hours of inactivity
 - All data processing happens client-side
 - No data is transmitted to external servers
-- Default credentials should be changed in production use
+- Default admin credentials should be changed in production use
 
 ## License
 

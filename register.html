@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Transport Invoice Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white shadow-lg rounded-lg p-8 max-w-md w-full">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Create Account</h1>
+            <p class="text-gray-600">Register for Transport Invoice System</p>
+        </div>
+
+        <form id="registerForm" class="space-y-6">
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                <input type="text" id="username" name="username" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Choose a username"
+                       minlength="3"
+                       pattern="[a-zA-Z0-9_]+"
+                       title="Username must be at least 3 characters and contain only letters, numbers, and underscores">
+                <p class="text-xs text-gray-500 mt-1">At least 3 characters, letters, numbers, and underscores only</p>
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <input type="password" id="password" name="password" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Choose a password"
+                       minlength="6">
+                <p class="text-xs text-gray-500 mt-1">At least 6 characters</p>
+            </div>
+
+            <div>
+                <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Confirm your password"
+                       minlength="6">
+            </div>
+
+            <div id="errorMessage" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
+            </div>
+
+            <div id="successMessage" class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded text-sm">
+            </div>
+
+            <button type="submit" 
+                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-md transition duration-200">
+                Register
+            </button>
+        </form>
+
+        <div class="mt-6 text-center text-sm text-gray-600">
+            <p>Already have an account? <a href="login.html" class="text-blue-500 hover:text-blue-600 font-medium">Login here</a></p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/lib/sql-wasm.js"></script>
+    <script type="module" src="assets/js/config.js"></script>
+    <script type="module" src="assets/js/datastore.js"></script>
+    <script type="module" src="assets/js/auth.js"></script>
+    <script type="module">
+        import AuthManager from './assets/js/auth.js';
+        
+        const authManager = new AuthManager();
+        const registerForm = document.getElementById('registerForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+
+        // Initialize auth manager
+        await authManager.initialize();
+
+        // Check if already authenticated
+        if (authManager.isAuthenticated()) {
+            window.location.href = 'index.html';
+        }
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Hide previous messages
+            errorMessage.classList.add('hidden');
+            successMessage.classList.add('hidden');
+            
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // Validate password match
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Passwords do not match';
+                errorMessage.classList.remove('hidden');
+                confirmPasswordInput.value = '';
+                confirmPasswordInput.focus();
+                return;
+            }
+
+            // Attempt registration
+            const result = await authManager.register(username, password);
+
+            if (result.success) {
+                successMessage.textContent = 'Registration successful! Redirecting to login...';
+                successMessage.classList.remove('hidden');
+                
+                // Clear form
+                registerForm.reset();
+                
+                // Redirect to login after 2 seconds
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            } else {
+                errorMessage.textContent = result.error;
+                errorMessage.classList.remove('hidden');
+                
+                // Clear password fields after failed attempt
+                passwordInput.value = '';
+                confirmPasswordInput.value = '';
+                passwordInput.focus();
+            }
+        });
+
+        // Clear messages when user starts typing
+        [usernameInput, passwordInput, confirmPasswordInput].forEach(input => {
+            input.addEventListener('input', () => {
+                errorMessage.classList.add('hidden');
+                successMessage.classList.add('hidden');
+            });
+        });
+
+        // Real-time password match validation
+        confirmPasswordInput.addEventListener('input', () => {
+            if (confirmPasswordInput.value && passwordInput.value !== confirmPasswordInput.value) {
+                confirmPasswordInput.setCustomValidity('Passwords do not match');
+            } else {
+                confirmPasswordInput.setCustomValidity('');
+            }
+        });
+    </script>
+</body>
+</html>
