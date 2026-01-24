@@ -251,7 +251,7 @@ class DataStoreManager {
       const stmt = this.db.prepare(`
         SELECT * FROM freight_details 
         WHERE user_id = ? 
-        ORDER BY created_at DESC
+        ORDER BY id DESC
       `);
 
       stmt.bind([userId]);
