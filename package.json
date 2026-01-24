@@ -6,7 +6,9 @@
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "build:css": "tailwindcss -i ./assets/css/tailwind-input.css -o ./assets/css/styles.css --minify",
+    "watch:css": "tailwindcss -i ./assets/css/tailwind-input.css -o ./assets/css/styles.css --watch"
   },
   "keywords": [
     "transport",
@@ -17,8 +19,11 @@
   "license": "MIT",
   "devDependencies": {
     "@jest/globals": "^29.7.0",
+    "autoprefixer": "^10.4.23",
     "fast-check": "^3.15.0",
     "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0"
+    "jest-environment-jsdom": "^29.7.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19"
   }
 }
