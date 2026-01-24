@@ -100,6 +100,43 @@
                         <!-- Records will be inserted here -->
                     </tbody>
                 </table>
+
+                <!-- Pagination Controls -->
+                <div id="paginationControls" class="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-700">
+                            Showing <span id="recordsFrom" class="font-semibold">0</span> to 
+                            <span id="recordsTo" class="font-semibold">0</span> of 
+                            <span id="recordsTotal" class="font-semibold">0</span> records
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="firstPageBtn" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <button id="prevPageBtn" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <span class="text-sm text-gray-700">
+                            Page <span id="currentPage" class="font-semibold">1</span> of 
+                            <span id="totalPages" class="font-semibold">1</span>
+                        </span>
+                        <button id="nextPageBtn" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                        <button id="lastPageBtn" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -140,6 +177,8 @@
           this.pdfExporter = new PDFExporter();
           this.allRecords = [];
           this.filteredRecords = [];
+          this.currentPage = 1;
+          this.recordsPerPage = 15;
         }
 
         async init() {
@@ -169,6 +208,12 @@
           document.getElementById('refreshBtn')?.addEventListener('click', () => this.loadRecords());
           document.getElementById('searchInput')?.addEventListener('input', (e) => this.handleSearch(e.target.value));
           document.getElementById('closeModal')?.addEventListener('click', () => this.closeModal());
+          
+          // Pagination event listeners
+          document.getElementById('firstPageBtn')?.addEventListener('click', () => this.goToPage(1));
+          document.getElementById('prevPageBtn')?.addEventListener('click', () => this.goToPage(this.currentPage - 1));
+          document.getElementById('nextPageBtn')?.addEventListener('click', () => this.goToPage(this.currentPage + 1));
+          document.getElementById('lastPageBtn')?.addEventListener('click', () => this.goToPage(this.getTotalPages()));
         }
 
         async loadRecords() {
@@ -185,6 +230,7 @@
             const userId = this.authManager.getUserId();
             this.allRecords = this.dataStore.getUserFreightRecords(userId);
             this.filteredRecords = [...this.allRecords];
+            this.currentPage = 1; // Reset to first page
 
             loadingIndicator?.classList.add('hidden');
 
@@ -193,6 +239,7 @@
             } else {
               recordsTable?.classList.remove('hidden');
               this.renderRecords();
+              this.updatePaginationControls();
             }
           } catch (error) {
             console.error('Failed to load records:', error);
@@ -201,13 +248,58 @@
           }
         }
 
+        getTotalPages() {
+          return Math.ceil(this.filteredRecords.length / this.recordsPerPage);
+        }
+
+        getPaginatedRecords() {
+          const startIndex = (this.currentPage - 1) * this.recordsPerPage;
+          const endIndex = startIndex + this.recordsPerPage;
+          return this.filteredRecords.slice(startIndex, endIndex);
+        }
+
+        goToPage(pageNumber) {
+          const totalPages = this.getTotalPages();
+          if (pageNumber < 1 || pageNumber > totalPages) return;
+          
+          this.currentPage = pageNumber;
+          this.renderRecords();
+          this.updatePaginationControls();
+        }
+
+        updatePaginationControls() {
+          const totalPages = this.getTotalPages();
+          const startRecord = (this.currentPage - 1) * this.recordsPerPage + 1;
+          const endRecord = Math.min(this.currentPage * this.recordsPerPage, this.filteredRecords.length);
+
+          // Update text
+          document.getElementById('currentPage').textContent = this.currentPage;
+          document.getElementById('totalPages').textContent = totalPages;
+          document.getElementById('recordsFrom').textContent = this.filteredRecords.length > 0 ? startRecord : 0;
+          document.getElementById('recordsTo').textContent = endRecord;
+          document.getElementById('recordsTotal').textContent = this.filteredRecords.length;
+
+          // Update button states
+          const firstPageBtn = document.getElementById('firstPageBtn');
+          const prevPageBtn = document.getElementById('prevPageBtn');
+          const nextPageBtn = document.getElementById('nextPageBtn');
+          const lastPageBtn = document.getElementById('lastPageBtn');
+
+          if (firstPageBtn) firstPageBtn.disabled = this.currentPage === 1;
+          if (prevPageBtn) prevPageBtn.disabled = this.currentPage === 1;
+          if (nextPageBtn) nextPageBtn.disabled = this.currentPage === totalPages || totalPages === 0;
+          if (lastPageBtn) lastPageBtn.disabled = this.currentPage === totalPages || totalPages === 0;
+        }
+
         renderRecords() {
           const tbody = document.getElementById('recordsTableBody');
           if (!tbody) return;
 
           tbody.innerHTML = '';
 
-          this.filteredRecords.forEach(record => {
+          const paginatedRecords = this.getPaginatedRecords();
+
+          paginatedRecords.forEach(record => {
             const row = document.createElement('tr');
             row.className = 'hover:bg-gray-50';
             
@@ -261,7 +353,9 @@
             );
           }
 
+          this.currentPage = 1; // Reset to first page on search
           this.renderRecords();
+          this.updatePaginationControls();
 
           // Show/hide empty state
           const emptyState = document.getElementById('emptyState');
