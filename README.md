@@ -7,10 +7,15 @@ A client-side web application for generating professional bilty (consignment not
 - **User Authentication**: Secure login and registration with session management
 - **User Registration**: Create new accounts with username/password validation
 - **Freight Details Entry**: Intuitive form for capturing shipment information
-- **List & Search**: View all freight records with search functionality
+- **List & Search**: View all freight records with powerful search functionality
+- **Advanced Filtering**: Filter by date range, amount range, weight range, origin, and destination
+- **Column Sorting**: Sort records by ID, origin, destination, weight, amount, or date
 - **Edit & Delete**: Modify or remove existing freight records with validation
 - **Document Generation**: Create professional bilty and invoice documents
 - **PDF Export**: Download documents as print-ready PDFs
+- **Bulk PDF Export**: Generate PDFs for multiple records at once
+- **CSV Export**: Export all records to CSV/Excel format
+- **Print View**: Print-friendly list view of all records
 - **eWay Bill Integration**: Include eWay bill information in documents
 - **Client-Side Storage**: All data stored locally in your browser using SQLite
 - **Offline Capable**: Works without an internet connection after initial load
@@ -133,18 +138,34 @@ After entering freight details:
 - Click "List Bilty / Invoices" in the navigation menu
 - View all your freight records in a table
 - Use the search box to filter records by origin, destination, goods, or ID
+- Click column headers to sort (ID, Origin, Destination, Weight, Amount, Date)
+- Click "Filters" to access advanced filtering options
 - Click "Bilty" or "Invoice" to preview documents
 - Click 📄 or 📋 icons to download PDFs directly
 - Click ✏️ to edit a record
 - Click 🗑️ to delete a record (with confirmation)
 
-### 7. Edit Records
+### 7. Advanced Filtering
+- Click the "Filters" button to show/hide filter panel
+- Filter by date range (from/to dates)
+- Filter by amount range (min/max)
+- Filter by weight range (min/max)
+- Filter by specific origin or destination
+- Click "Apply Filters" to filter records
+- Click "Clear Filters" to reset all filters
+
+### 8. Export & Print
+- **Export CSV**: Download all filtered records as CSV file for Excel
+- **Bulk PDF**: Generate PDFs for all filtered records (bilty + invoice for each)
+- **Print**: Print the current list view with all filtered records
+
+### 9. Edit Records
 - Click the edit icon (✏️) on any record
 - Modify the freight details in the modal form
 - Click "Save Changes" to update
 - Changes are validated and saved immediately
 
-### 8. Delete Records
+### 10. Delete Records
 - Click the delete icon (🗑️) on any record
 - Confirm the deletion in the dialog
 - Record and associated document history will be permanently removed
