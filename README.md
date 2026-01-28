@@ -17,6 +17,12 @@ A client-side web application for generating professional bilty (consignment not
   - Weight distribution analysis
   - Recent activity feed
   - Flexible date range filtering (today, week, month, year, custom)
+- **Templates & Customization**: Personalize your documents and workflow
+  - Save multiple company profiles with full details (name, address, GST, PAN, contact)
+  - Set default company for quick document generation
+  - Create custom fields for freight details (text, number, date, textarea, dropdown)
+  - Flexible field types with validation
+  - Manage multiple businesses from one account
 - **Edit & Delete**: Modify or remove existing freight records with validation
 - **Document Generation**: Create professional bilty and invoice documents
 - **PDF Export**: Download documents as print-ready PDFs

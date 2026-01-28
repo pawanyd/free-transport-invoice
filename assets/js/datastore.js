@@ -30,6 +30,9 @@ class DataStoreManager {
         this.db = new SQL.Database(uint8Array);
         this.initialized = true;
         console.log('Database loaded from LocalStorage');
+        
+        // Run migrations for existing database
+        await this.runMigrations();
       } else {
         // Create new database
         this.db = new SQL.Database();
@@ -44,6 +47,110 @@ class DataStoreManager {
       console.error('Database initialization failed:', error);
       this.initialized = false;
       return { success: false, error: `Failed to initialize database: ${error.message}` };
+    }
+  }
+
+  /**
+   * Run database migrations for existing databases
+   */
+  async runMigrations() {
+    try {
+      // Check if company_profiles table exists
+      const companyTableExists = this.tableExists('company_profiles');
+      if (!companyTableExists) {
+        console.log('Running migration: Adding company_profiles table');
+        const createCompanyProfilesTable = `
+          CREATE TABLE IF NOT EXISTS company_profiles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            address TEXT,
+            city TEXT,
+            state TEXT,
+            pincode TEXT,
+            gst_number TEXT,
+            pan_number TEXT,
+            phone TEXT,
+            email TEXT,
+            website TEXT,
+            is_default INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+          );
+        `;
+        this.db.run(createCompanyProfilesTable);
+        this.db.run('CREATE INDEX IF NOT EXISTS idx_company_profiles_user_id ON company_profiles(user_id);');
+      }
+
+      // Check if custom_field_definitions table exists
+      const customFieldsTableExists = this.tableExists('custom_field_definitions');
+      if (!customFieldsTableExists) {
+        console.log('Running migration: Adding custom_field_definitions table');
+        const createCustomFieldsTable = `
+          CREATE TABLE IF NOT EXISTS custom_field_definitions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            field_name TEXT NOT NULL,
+            field_label TEXT NOT NULL,
+            field_type TEXT NOT NULL,
+            is_required INTEGER DEFAULT 0,
+            options TEXT,
+            display_order INTEGER DEFAULT 0,
+            is_active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+          );
+        `;
+        this.db.run(createCustomFieldsTable);
+        this.db.run('CREATE INDEX IF NOT EXISTS idx_custom_fields_user_id ON custom_field_definitions(user_id);');
+      }
+
+      // Check if freight_details has new columns
+      const hasCompanyProfileId = this.columnExists('freight_details', 'company_profile_id');
+      if (!hasCompanyProfileId) {
+        console.log('Running migration: Adding company_profile_id to freight_details');
+        this.db.run('ALTER TABLE freight_details ADD COLUMN company_profile_id INTEGER;');
+        this.db.run('CREATE INDEX IF NOT EXISTS idx_freight_company_profile ON freight_details(company_profile_id);');
+      }
+
+      const hasCustomFields = this.columnExists('freight_details', 'custom_fields');
+      if (!hasCustomFields) {
+        console.log('Running migration: Adding custom_fields to freight_details');
+        this.db.run('ALTER TABLE freight_details ADD COLUMN custom_fields TEXT;');
+      }
+
+      this.persistToLocalStorage();
+      console.log('Migrations completed successfully');
+    } catch (error) {
+      console.error('Migration failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if a table exists
+   */
+  tableExists(tableName) {
+    try {
+      const result = this.db.exec(`SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}';`);
+      return result.length > 0 && result[0].values.length > 0;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Check if a column exists in a table
+   */
+  columnExists(tableName, columnName) {
+    try {
+      const result = this.db.exec(`PRAGMA table_info(${tableName});`);
+      if (result.length === 0) return false;
+      
+      const columns = result[0].values;
+      return columns.some(col => col[1] === columnName);
+    } catch (error) {
+      return false;
     }
   }
 
@@ -64,6 +171,7 @@ class DataStoreManager {
       CREATE TABLE IF NOT EXISTS freight_details (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
+        company_profile_id INTEGER,
         origin TEXT NOT NULL,
         destination TEXT NOT NULL,
         goods_description TEXT NOT NULL,
@@ -73,8 +181,10 @@ class DataStoreManager {
         taxes REAL DEFAULT 0,
         eway_bill_number TEXT,
         eway_bill_date TEXT,
+        custom_fields TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id)
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        FOREIGN KEY (company_profile_id) REFERENCES company_profiles(id)
       );
     `;
 
@@ -88,17 +198,58 @@ class DataStoreManager {
       );
     `;
 
+    const createCompanyProfilesTable = `
+      CREATE TABLE IF NOT EXISTS company_profiles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        address TEXT,
+        city TEXT,
+        state TEXT,
+        pincode TEXT,
+        gst_number TEXT,
+        pan_number TEXT,
+        phone TEXT,
+        email TEXT,
+        website TEXT,
+        is_default INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+    `;
+
+    const createCustomFieldsTable = `
+      CREATE TABLE IF NOT EXISTS custom_field_definitions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        field_name TEXT NOT NULL,
+        field_label TEXT NOT NULL,
+        field_type TEXT NOT NULL,
+        is_required INTEGER DEFAULT 0,
+        options TEXT,
+        display_order INTEGER DEFAULT 0,
+        is_active INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+    `;
+
     // Create indexes for performance
     const createIndexes = `
       CREATE INDEX IF NOT EXISTS idx_freight_user_id ON freight_details(user_id);
       CREATE INDEX IF NOT EXISTS idx_freight_created_at ON freight_details(created_at);
+      CREATE INDEX IF NOT EXISTS idx_freight_company_profile ON freight_details(company_profile_id);
       CREATE INDEX IF NOT EXISTS idx_document_freight_id ON document_history(freight_id);
+      CREATE INDEX IF NOT EXISTS idx_company_profiles_user_id ON company_profiles(user_id);
+      CREATE INDEX IF NOT EXISTS idx_custom_fields_user_id ON custom_field_definitions(user_id);
     `;
 
     try {
       this.db.run(createUsersTable);
       this.db.run(createFreightDetailsTable);
       this.db.run(createDocumentHistoryTable);
+      this.db.run(createCompanyProfilesTable);
+      this.db.run(createCustomFieldsTable);
       this.db.run(createIndexes);
       this.persistToLocalStorage();
     } catch (error) {
@@ -507,6 +658,484 @@ class DataStoreManager {
     } catch (error) {
       console.error('Failed to clear data:', error);
       return { success: false, error: error.message };
+    }
+  }
+
+  // ===== COMPANY PROFILE METHODS =====
+
+  /**
+   * Save company profile
+   */
+  saveCompanyProfile(profileData) {
+    if (!this.initialized) {
+      return { success: false, error: 'Database not initialized' };
+    }
+
+    try {
+      const stmt = this.db.prepare(`
+        INSERT INTO company_profiles (
+          user_id, name, address, city, state, pincode,
+          gst_number, pan_number, phone, email, website, is_default
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      stmt.run([
+        profileData.userId,
+        profileData.name,
+        profileData.address || null,
+        profileData.city || null,
+        profileData.state || null,
+        profileData.pincode || null,
+        profileData.gstNumber || null,
+        profileData.panNumber || null,
+        profileData.phone || null,
+        profileData.email || null,
+        profileData.website || null,
+        profileData.isDefault ? 1 : 0
+      ]);
+
+      stmt.free();
+
+      const result = this.db.exec('SELECT last_insert_rowid() as id');
+      const id = result[0].values[0][0];
+
+      // If this is set as default, unset other defaults
+      if (profileData.isDefault) {
+        this.unsetOtherDefaults(profileData.userId, id);
+      }
+
+      this.persistToLocalStorage();
+      return { success: true, id };
+    } catch (error) {
+      console.error('Failed to save company profile:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Update company profile
+   */
+  updateCompanyProfile(id, profileData) {
+    if (!this.initialized) {
+      return { success: false, error: 'Database not initialized' };
+    }
+
+    try {
+      const stmt = this.db.prepare(`
+        UPDATE company_profiles SET
+          name = ?, address = ?, city = ?, state = ?, pincode = ?,
+          gst_number = ?, pan_number = ?, phone = ?, email = ?, website = ?, is_default = ?
+        WHERE id = ? AND user_id = ?
+      `);
+
+      stmt.run([
+        profileData.name,
+        profileData.address || null,
+        profileData.city || null,
+        profileData.state || null,
+        profileData.pincode || null,
+        profileData.gstNumber || null,
+        profileData.panNumber || null,
+        profileData.phone || null,
+        profileData.email || null,
+        profileData.website || null,
+        profileData.isDefault ? 1 : 0,
+        id,
+        profileData.userId
+      ]);
+
+      stmt.free();
+
+      if (profileData.isDefault) {
+        this.unsetOtherDefaults(profileData.userId, id);
+      }
+
+      this.persistToLocalStorage();
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to update company profile:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Unset other default profiles
+   */
+  unsetOtherDefaults(userId, exceptId) {
+    try {
+      const stmt = this.db.prepare(`
+        UPDATE company_profiles SET is_default = 0
+        WHERE user_id = ? AND id != ?
+      `);
+      stmt.run([userId, exceptId]);
+      stmt.free();
+    } catch (error) {
+      console.error('Failed to unset other defaults:', error);
+    }
+  }
+
+  /**
+   * Get all company profiles for user
+   */
+  getUserCompanyProfiles(userId) {
+    if (!this.initialized) {
+      return [];
+    }
+
+    try {
+      const stmt = this.db.prepare(`
+        SELECT * FROM company_profiles
+        WHERE user_id = ?
+        ORDER BY is_default DESC, name ASC
+      `);
+
+      stmt.bind([userId]);
+      
+      const profiles = [];
+      while (stmt.step()) {
+        const row = stmt.getAsObject();
+        profiles.push({
+          id: row.id,
+          userId: row.user_id,
+          name: row.name,
+          address: row.address,
+          city: row.city,
+          state: row.state,
+          pincode: row.pincode,
+          gstNumber: row.gst_number,
+          panNumber: row.pan_number,
+          phone: row.phone,
+          email: row.email,
+          website: row.website,
+          isDefault: row.is_default === 1,
+          createdAt: row.created_at
+        });
+      }
+
+      stmt.free();
+      return profiles;
+    } catch (error) {
+      console.error('Failed to get company profiles:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get default company profile
+   */
+  getDefaultCompanyProfile(userId) {
+    if (!this.initialized) {
+      return null;
+    }
+
+    try {
+      const stmt = this.db.prepare(`
+        SELECT * FROM company_profiles
+        WHERE user_id = ? AND is_default = 1
+        LIMIT 1
+      `);
+
+      stmt.bind([userId]);
+      
+      if (stmt.step()) {
+        const row = stmt.getAsObject();
+        stmt.free();
+        return {
+          id: row.id,
+          userId: row.user_id,
+          name: row.name,
+          address: row.address,
+          city: row.city,
+          state: row.state,
+          pincode: row.pincode,
+          gstNumber: row.gst_number,
+          panNumber: row.pan_number,
+          phone: row.phone,
+          email: row.email,
+          website: row.website,
+          isDefault: true,
+          createdAt: row.created_at
+        };
+      }
+
+      stmt.free();
+      return null;
+    } catch (error) {
+      console.error('Failed to get default company profile:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Delete company profile
+   */
+  deleteCompanyProfile(id, userId) {
+    if (!this.initialized) {
+      return { success: false, error: 'Database not initialized' };
+    }
+
+    try {
+      const stmt = this.db.prepare(`
+        DELETE FROM company_profiles WHERE id = ? AND user_id = ?
+      `);
+      stmt.run([id, userId]);
+      stmt.free();
+
+      this.persistToLocalStorage();
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to delete company profile:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ===== CUSTOM FIELDS METHODS =====
+
+  /**
+   * Save custom field definition
+   */
+  saveCustomField(fieldData) {
+    if (!this.initialized) {
+      return { success: false, error: 'Database not initialized' };
+    }
+
+    try {
+      const stmt = this.db.prepare(`
+        INSERT INTO custom_field_definitions (
+          user_id, field_name, field_label, field_type,
+          is_required, options, display_order, is_active
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      stmt.run([
+        fieldData.userId,
+        fieldData.fieldName,
+        fieldData.fieldLabel,
+        fieldData.fieldType,
+        fieldData.isRequired ? 1 : 0,
+        fieldData.options ? JSON.stringify(fieldData.options) : null,
+        fieldData.displayOrder || 0,
+        fieldData.isActive !== false ? 1 : 0
+      ]);
+
+      stmt.free();
+
+      const result = this.db.exec('SELECT last_insert_rowid() as id');
+      const id = result[0].values[0][0];
+
+      this.persistToLocalStorage();
+      return { success: true, id };
+    } catch (error) {
+      console.error('Failed to save custom field:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get all custom fields for user
+   */
+  getUserCustomFields(userId) {
+    if (!this.initialized) {
+      return [];
+    }
+
+    try {
+      const stmt = this.db.prepare(`
+        SELECT * FROM custom_field_definitions
+        WHERE user_id = ? AND is_active = 1
+        ORDER BY display_order ASC, field_label ASC
+      `);
+
+      stmt.bind([userId]);
+      
+      const fields = [];
+      while (stmt.step()) {
+        const row = stmt.getAsObject();
+        fields.push({
+          id: row.id,
+          userId: row.user_id,
+          fieldName: row.field_name,
+          fieldLabel: row.field_label,
+          fieldType: row.field_type,
+          isRequired: row.is_required === 1,
+          options: row.options ? JSON.parse(row.options) : null,
+          displayOrder: row.display_order,
+          isActive: row.is_active === 1,
+          createdAt: row.created_at
+        });
+      }
+
+      stmt.free();
+      return fields;
+    } catch (error) {
+      console.error('Failed to get custom fields:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Delete custom field
+   */
+  deleteCustomField(id, userId) {
+    if (!this.initialized) {
+      return { success: false, error: 'Database not initialized' };
+    }
+
+    try {
+      const stmt = this.db.prepare(`
+        UPDATE custom_field_definitions SET is_active = 0
+        WHERE id = ? AND user_id = ?
+      `);
+      stmt.run([id, userId]);
+      stmt.free();
+
+      this.persistToLocalStorage();
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to delete custom field:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ===== BACKUP & RESTORE METHODS =====
+
+  /**
+   * Export entire database to JSON
+   */
+  exportBackup() {
+    if (!this.initialized) {
+      return { success: false, error: 'Database not initialized' };
+    }
+
+    try {
+      const backup = {
+        version: '1.0',
+        exportDate: new Date().toISOString(),
+        data: {}
+      };
+
+      // Export all tables
+      const tables = ['users', 'freight_details', 'document_history', 'company_profiles', 'custom_field_definitions'];
+      
+      tables.forEach(tableName => {
+        try {
+          const result = this.db.exec(`SELECT * FROM ${tableName}`);
+          if (result.length > 0) {
+            const columns = result[0].columns;
+            const values = result[0].values;
+            backup.data[tableName] = values.map(row => {
+              const obj = {};
+              columns.forEach((col, idx) => {
+                obj[col] = row[idx];
+              });
+              return obj;
+            });
+          } else {
+            backup.data[tableName] = [];
+          }
+        } catch (error) {
+          console.warn(`Table ${tableName} not found, skipping`);
+          backup.data[tableName] = [];
+        }
+      });
+
+      return { success: true, data: backup };
+    } catch (error) {
+      console.error('Failed to export backup:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Import backup from JSON
+   */
+  async importBackup(backupData) {
+    try {
+      // Validate backup data
+      if (!backupData.version || !backupData.data) {
+        return { success: false, error: 'Invalid backup file format' };
+      }
+
+      // Clear existing database
+      this.clearAllData();
+
+      // Reinitialize
+      const SQL = await initSqlJs({
+        locateFile: file => `assets/lib/${file}`
+      });
+      this.db = new SQL.Database();
+      this.initialized = true;
+
+      // Create tables
+      await this.createTables();
+
+      // Import data
+      const tables = ['users', 'freight_details', 'document_history', 'company_profiles', 'custom_field_definitions'];
+      
+      for (const tableName of tables) {
+        const tableData = backupData.data[tableName];
+        if (!tableData || tableData.length === 0) continue;
+
+        // Get column names from first row
+        const columns = Object.keys(tableData[0]);
+        const placeholders = columns.map(() => '?').join(', ');
+        
+        const stmt = this.db.prepare(`
+          INSERT INTO ${tableName} (${columns.join(', ')})
+          VALUES (${placeholders})
+        `);
+
+        tableData.forEach(row => {
+          const values = columns.map(col => row[col]);
+          stmt.run(values);
+        });
+
+        stmt.free();
+      }
+
+      this.persistToLocalStorage();
+      
+      // Update last backup date
+      localStorage.setItem('lastBackupDate', new Date().toISOString());
+
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to import backup:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get database statistics
+   */
+  getDatabaseStats() {
+    if (!this.initialized) {
+      return null;
+    }
+
+    try {
+      const stats = {};
+
+      // Count records in each table
+      const tables = ['freight_details', 'company_profiles', 'custom_field_definitions'];
+      tables.forEach(tableName => {
+        try {
+          const result = this.db.exec(`SELECT COUNT(*) as count FROM ${tableName}`);
+          stats[tableName] = result[0]?.values[0]?.[0] || 0;
+        } catch (error) {
+          stats[tableName] = 0;
+        }
+      });
+
+      // Calculate database size
+      const dbData = localStorage.getItem(this.STORAGE_KEY);
+      stats.sizeBytes = dbData ? dbData.length : 0;
+      stats.sizeKB = (stats.sizeBytes / 1024).toFixed(2);
+
+      return stats;
+    } catch (error) {
+      console.error('Failed to get database stats:', error);
+      return null;
     }
   }
 }
