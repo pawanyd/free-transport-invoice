@@ -1,0 +1,16 @@
+<form id="{{formId}}" class="space-y-4">
+    <div id="{{formId}}Fields">
+        <!-- Form fields will be injected here -->
+    </div>
+
+    <div id="{{formId}}ErrorContainer"></div>
+    <div id="{{formId}}SuccessContainer"></div>
+
+    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md font-semibold">
+        {{submitText}}
+    </button>
+
+    <p class="text-center text-sm text-gray-600">
+        {{footerText}} <a href="{{footerLink}}" class="text-blue-600 hover:text-blue-700 font-semibold">{{footerLinkText}}</a>
+    </p>
+</form>

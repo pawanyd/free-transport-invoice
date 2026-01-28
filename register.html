@@ -4,147 +4,135 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Transport Invoice Management System</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="./assets/css/styles.css">
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
-    <div class="bg-white shadow-lg rounded-lg p-8 max-w-md w-full">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Create Account</h1>
-            <p class="text-gray-600">Register for Transport Invoice System</p>
-        </div>
+    <div class="container mx-auto px-4 py-8 max-w-md">
+        <%- include('components/layout/auth-header', { subtitle: 'Create your account to get started' }) %>
 
-        <form id="registerForm" class="space-y-6">
-            <div>
-                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                <input type="text" id="username" name="username" required 
-                       class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                       placeholder="Choose a username"
-                       minlength="3"
-                       pattern="[a-zA-Z0-9_]+"
-                       title="Username must be at least 3 characters and contain only letters, numbers, and underscores">
-                <p class="text-xs text-gray-500 mt-1">At least 3 characters, letters, numbers, and underscores only</p>
-            </div>
+        <main class="bg-white shadow-md rounded-lg p-8">
+            <h2 class="text-2xl font-bold text-center mb-6">Create Account</h2>
+            
+            <form id="registerForm" class="space-y-4">
+                <%- include('components/forms/text-input', { 
+                    id: 'username',
+                    name: 'username',
+                    label: 'Username',
+                    type: 'text',
+                    required: '*',
+                    requiredAttr: 'required',
+                    step: '',
+                    min: '',
+                    placeholder: 'Choose a username'
+                }) %>
 
-            <div>
-                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                <input type="password" id="password" name="password" required 
-                       class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                       placeholder="Choose a password"
-                       minlength="6">
-                <p class="text-xs text-gray-500 mt-1">At least 6 characters</p>
-            </div>
+                <%- include('components/forms/text-input', { 
+                    id: 'password',
+                    name: 'password',
+                    label: 'Password',
+                    type: 'password',
+                    required: '*',
+                    requiredAttr: 'required',
+                    step: '',
+                    min: '',
+                    placeholder: 'Choose a password'
+                }) %>
 
-            <div>
-                <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" required 
-                       class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                       placeholder="Confirm your password"
-                       minlength="6">
-            </div>
+                <%- include('components/forms/text-input', { 
+                    id: 'confirmPassword',
+                    name: 'confirmPassword',
+                    label: 'Confirm Password',
+                    type: 'password',
+                    required: '*',
+                    requiredAttr: 'required',
+                    step: '',
+                    min: '',
+                    placeholder: 'Confirm your password'
+                }) %>
 
-            <div id="errorMessage" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
-            </div>
+                <%- include('components/ui/alert', { 
+                    id: 'errorMessage',
+                    bgColor: 'bg-red-50',
+                    borderColor: 'border-red-200',
+                    textColor: 'text-red-700'
+                }) %>
 
-            <div id="successMessage" class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded text-sm">
-            </div>
+                <%- include('components/ui/alert', { 
+                    id: 'successMessage',
+                    bgColor: 'bg-green-50',
+                    borderColor: 'border-green-200',
+                    textColor: 'text-green-700'
+                }) %>
 
-            <button type="submit" 
-                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-md transition duration-200">
-                Register
-            </button>
-        </form>
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md font-semibold">
+                    Register
+                </button>
 
-        <div class="mt-6 text-center text-sm text-gray-600">
-            <p>Already have an account? <a href="login.html" class="text-blue-500 hover:text-blue-600 font-medium">Login here</a></p>
-        </div>
+                <p class="text-center text-sm text-gray-600">
+                    Already have an account? <a href="./login.html" class="text-blue-600 hover:text-blue-700 font-semibold">Login here</a>
+                </p>
+            </form>
+        </main>
     </div>
 
-    <!-- Scripts -->
-    <script src="assets/lib/sql-wasm.js"></script>
-    <script type="module" src="assets/js/config.js"></script>
-    <script type="module" src="assets/js/datastore.js"></script>
-    <script type="module" src="assets/js/auth.js"></script>
+    <script type="module" src="./assets/js/config.js"></script>
+    <script type="module" src="./assets/js/datastore.js"></script>
+    <script type="module" src="./assets/js/auth.js"></script>
+    
     <script type="module">
         import { APP_VERSION } from './assets/js/version.js';
         
-        // Dynamic import with version for cache busting
         const AuthManager = (await import(`./assets/js/auth.js?v=${APP_VERSION}`)).default;
         
         const authManager = new AuthManager();
-        const registerForm = document.getElementById('registerForm');
-        const errorMessage = document.getElementById('errorMessage');
-        const successMessage = document.getElementById('successMessage');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const confirmPasswordInput = document.getElementById('confirmPassword');
-
-        // Initialize auth manager
         await authManager.initialize();
 
-        // Check if already authenticated
         if (authManager.isAuthenticated()) {
-            window.location.href = 'index.html';
+            window.location.href = './index.html';
         }
 
-        registerForm.addEventListener('submit', async (e) => {
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Hide previous messages
-            errorMessage.classList.add('hidden');
-            successMessage.classList.add('hidden');
+            document.getElementById('errorMessage')?.classList.add('hidden');
+            document.getElementById('successMessage')?.classList.add('hidden');
             
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value;
-            const confirmPassword = confirmPasswordInput.value;
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
 
-            // Validate password match
             if (password !== confirmPassword) {
-                errorMessage.textContent = 'Passwords do not match';
+                const errorMessage = document.getElementById('errorMessage');
+                const errorMessageText = document.getElementById('errorMessageText');
+                errorMessageText.textContent = 'Passwords do not match';
                 errorMessage.classList.remove('hidden');
-                confirmPasswordInput.value = '';
-                confirmPasswordInput.focus();
+                document.getElementById('confirmPassword').value = '';
+                document.getElementById('confirmPassword').focus();
                 return;
             }
 
-            // Attempt registration
             const result = await authManager.register(username, password);
 
             if (result.success) {
-                successMessage.textContent = 'Registration successful! Redirecting to login...';
+                const successMessage = document.getElementById('successMessage');
+                const successMessageText = document.getElementById('successMessageText');
+                successMessageText.textContent = 'Registration successful! Redirecting to login...';
                 successMessage.classList.remove('hidden');
                 
-                // Clear form
-                registerForm.reset();
+                document.getElementById('registerForm').reset();
                 
-                // Redirect to login after 2 seconds
                 setTimeout(() => {
-                    window.location.href = 'login.html';
+                    window.location.href = './login.html';
                 }, 2000);
             } else {
-                errorMessage.textContent = result.error;
+                const errorMessage = document.getElementById('errorMessage');
+                const errorMessageText = document.getElementById('errorMessageText');
+                errorMessageText.textContent = result.error;
                 errorMessage.classList.remove('hidden');
                 
-                // Clear password fields after failed attempt
-                passwordInput.value = '';
-                confirmPasswordInput.value = '';
-                passwordInput.focus();
-            }
-        });
-
-        // Clear messages when user starts typing
-        [usernameInput, passwordInput, confirmPasswordInput].forEach(input => {
-            input.addEventListener('input', () => {
-                errorMessage.classList.add('hidden');
-                successMessage.classList.add('hidden');
-            });
-        });
-
-        // Real-time password match validation
-        confirmPasswordInput.addEventListener('input', () => {
-            if (confirmPasswordInput.value && passwordInput.value !== confirmPasswordInput.value) {
-                confirmPasswordInput.setCustomValidity('Passwords do not match');
-            } else {
-                confirmPasswordInput.setCustomValidity('');
+                document.getElementById('password').value = '';
+                document.getElementById('confirmPassword').value = '';
+                document.getElementById('password').focus();
             }
         });
     </script>

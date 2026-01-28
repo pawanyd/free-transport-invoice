@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{pageTitle}} - Transport Invoice Management System</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    @yield('styles')
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        @include('components/layout/header')
+
+        <!-- Main Content -->
+        <main class="bg-white shadow-md rounded-lg p-6">
+            @yield('content')
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/lib/sql-wasm.js"></script>
+    <script src="assets/lib/html2canvas.min.js"></script>
+    <script src="assets/lib/jspdf.umd.min.js"></script>
+    
+    @yield('scripts')
+</body>
+</html>

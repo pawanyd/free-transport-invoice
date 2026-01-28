@@ -4,112 +4,103 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Transport Invoice Management System</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="./assets/css/styles.css">
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
-    <div class="bg-white shadow-lg rounded-lg p-8 max-w-md w-full">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Transport Invoice System</h1>
-            <p class="text-gray-600">Please log in to continue</p>
-        </div>
+    <div class="container mx-auto px-4 py-8 max-w-md">
+        <%- include('components/layout/auth-header', { subtitle: 'Please login to continue' }) %>
 
-        <form id="loginForm" class="space-y-6">
-            <div>
-                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                <input type="text" id="username" name="username" required 
-                       class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                       placeholder="Enter your username">
-            </div>
+        <main class="bg-white shadow-md rounded-lg p-8">
+            <h2 class="text-2xl font-bold text-center mb-6">Login</h2>
+            
+            <form id="loginForm" class="space-y-4">
+                <%- include('components/forms/text-input', { 
+                    id: 'username',
+                    name: 'username',
+                    label: 'Username',
+                    type: 'text',
+                    required: '*',
+                    requiredAttr: 'required',
+                    step: '',
+                    min: '',
+                    placeholder: 'Enter your username'
+                }) %>
 
-            <div>
-                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                <input type="password" id="password" name="password" required 
-                       class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                       placeholder="Enter your password">
-            </div>
+                <%- include('components/forms/text-input', { 
+                    id: 'password',
+                    name: 'password',
+                    label: 'Password',
+                    type: 'password',
+                    required: '*',
+                    requiredAttr: 'required',
+                    step: '',
+                    min: '',
+                    placeholder: 'Enter your password'
+                }) %>
 
-            <div id="errorMessage" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
-            </div>
+                <%- include('components/ui/alert', { 
+                    id: 'errorMessage',
+                    bgColor: 'bg-red-50',
+                    borderColor: 'border-red-200',
+                    textColor: 'text-red-700'
+                }) %>
 
-            <button type="submit" 
-                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-md transition duration-200">
-                Login
-            </button>
-        </form>
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md font-semibold">
+                    Login
+                </button>
 
-        <div class="mt-6 text-center text-sm text-gray-600">
-            <p>Don't have an account? <a href="register.html" class="text-blue-500 hover:text-blue-600 font-medium">Register here</a></p>
-            <p class="mt-2">Default credentials: admin / admin123</p>
-        </div>
+                <p class="text-center text-sm text-gray-600">
+                    Don't have an account? <a href="./register.html" class="text-blue-600 hover:text-blue-700 font-semibold">Register here</a>
+                </p>
+            </form>
+        </main>
     </div>
 
-    <!-- Scripts -->
-    <script src="assets/lib/sql-wasm.js"></script>
-    <script type="module" src="assets/js/config.js"></script>
-    <script type="module" src="assets/js/datastore.js"></script>
-    <script type="module" src="assets/js/auth.js"></script>
+    <script type="module" src="./assets/js/datastore.js"></script>
+    <script type="module" src="./assets/js/auth.js"></script>
+    
     <script type="module">
         import { APP_VERSION } from './assets/js/version.js';
         
-        // Dynamic import with version for cache busting
         const AuthManager = (await import(`./assets/js/auth.js?v=${APP_VERSION}`)).default;
         
         const authManager = new AuthManager();
-        const loginForm = document.getElementById('loginForm');
-        const errorMessage = document.getElementById('errorMessage');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-
-        // Initialize auth manager
         await authManager.initialize();
 
-        // Check if session expired
         const sessionExpired = localStorage.getItem('sessionExpired');
         if (sessionExpired === 'true') {
-            errorMessage.textContent = 'Your session has expired. Please log in again.';
-            errorMessage.classList.remove('hidden');
-            errorMessage.classList.remove('bg-red-50', 'border-red-200', 'text-red-700');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorMessageText = document.getElementById('errorMessageText');
+            errorMessageText.textContent = 'Your session has expired. Please log in again.';
+            errorMessage.classList.remove('hidden', 'bg-red-50', 'border-red-200', 'text-red-700');
             errorMessage.classList.add('bg-yellow-50', 'border-yellow-200', 'text-yellow-700');
             localStorage.removeItem('sessionExpired');
         }
 
-        // Check if already authenticated
         if (authManager.isAuthenticated()) {
-            window.location.href = 'index.html';
+            window.location.href = './index.html';
         }
 
-        loginForm.addEventListener('submit', async (e) => {
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value;
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
 
             const result = await authManager.login(username, password);
 
             if (result.success) {
-                window.location.href = 'index.html';
+                window.location.href = './index.html';
             } else {
-                // Log failed attempt to console for debugging
-                console.warn('Login failed:', result.error);
-                
-                errorMessage.textContent = result.error;
-                errorMessage.classList.remove('hidden');
-                errorMessage.classList.remove('bg-yellow-50', 'border-yellow-200', 'text-yellow-700');
+                const errorMessage = document.getElementById('errorMessage');
+                const errorMessageText = document.getElementById('errorMessageText');
+                errorMessageText.textContent = result.error;
+                errorMessage.classList.remove('hidden', 'bg-yellow-50', 'border-yellow-200', 'text-yellow-700');
                 errorMessage.classList.add('bg-red-50', 'border-red-200', 'text-red-700');
                 
-                // Clear password field after failed attempt
-                passwordInput.value = '';
-                passwordInput.focus();
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
             }
-        });
-
-        // Clear error message when user starts typing
-        usernameInput.addEventListener('input', () => {
-            errorMessage.classList.add('hidden');
-        });
-        
-        passwordInput.addEventListener('input', () => {
-            errorMessage.classList.add('hidden');
         });
     </script>
 </body>

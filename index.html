@@ -3,36 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transport Invoice Management System</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>Create New - Transport Invoice Management System</title>
+    <link rel="stylesheet" href="./assets/css/styles.css">
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div id="app" class="container mx-auto px-4 py-8">
-        <!-- Main application content will be loaded here -->
-        <header class="bg-white shadow-md rounded-lg p-6 mb-6">
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-2xl font-bold text-gray-800">Transport Invoice Management System</h1>
-                <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
-                    Logout
-                </button>
-            </div>
-            
-            <!-- Navigation Menu -->
-            <nav class="border-t pt-4">
-                <ul class="flex gap-4">
-                    <li>
-                        <a href="index.html" class="text-blue-600 font-bold border-b-2 border-blue-600">
-                            Create New
-                        </a>
-                    </li>
-                    <li>
-                        <a href="list-documents.html" class="text-gray-600 hover:text-blue-600 font-medium">
-                            List Bilty / Invoices
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </header>
+        <!-- Header Component -->
+        <%- include('components/layout/header', { 
+            activePage: 'create'
+        }) %>
 
         <main class="bg-white shadow-md rounded-lg p-6">
             <!-- Freight details form -->
@@ -40,87 +19,120 @@
                 <h2 class="text-xl font-semibold mb-4">Freight Details</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="origin" class="block text-sm font-medium text-gray-700 mb-1">Origin *</label>
-                        <div class="relative">
-                            <input type="text" id="origin" name="origin" required autocomplete="off"
-                                   placeholder="Search or type city name"
-                                   class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <svg class="absolute right-3 top-3 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                            <div id="originDropdown" class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto hidden">
-                                <!-- Dropdown items will be populated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
+                    <%- include('components/forms/city-input', { 
+                        id: 'origin', 
+                        name: 'origin', 
+                        label: 'Origin' 
+                    }) %>
                     
-                    <div>
-                        <label for="destination" class="block text-sm font-medium text-gray-700 mb-1">Destination *</label>
-                        <div class="relative">
-                            <input type="text" id="destination" name="destination" required autocomplete="off"
-                                   placeholder="Search or type city name"
-                                   class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <svg class="absolute right-3 top-3 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                            <div id="destinationDropdown" class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto hidden">
-                                <!-- Dropdown items will be populated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
+                    <%- include('components/forms/city-input', { 
+                        id: 'destination', 
+                        name: 'destination', 
+                        label: 'Destination' 
+                    }) %>
                 </div>
 
-                <div>
-                    <label for="goodsDescription" class="block text-sm font-medium text-gray-700 mb-1">Goods Description *</label>
-                    <textarea id="goodsDescription" name="goodsDescription" required rows="3"
-                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                <%- include('components/forms/textarea-input', { 
+                    id: 'goodsDescription', 
+                    name: 'goodsDescription', 
+                    label: 'Goods Description',
+                    required: '*',
+                    requiredAttr: 'required',
+                    rows: '3',
+                    placeholder: ''
+                }) %>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <%- include('components/forms/text-input', { 
+                        id: 'weight', 
+                        name: 'weight', 
+                        label: 'Weight (kg)',
+                        type: 'number',
+                        required: '*',
+                        requiredAttr: 'required',
+                        step: 'step="0.01"',
+                        min: 'min="0.01"',
+                        placeholder: ''
+                    }) %>
+                    
+                    <%- include('components/forms/text-input', { 
+                        id: 'amount', 
+                        name: 'amount', 
+                        label: 'Amount (₹)',
+                        type: 'number',
+                        required: '*',
+                        requiredAttr: 'required',
+                        step: 'step="0.01"',
+                        min: 'min="0.01"',
+                        placeholder: ''
+                    }) %>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">Weight (kg) *</label>
-                        <input type="number" id="weight" name="weight" required step="0.01" min="0.01"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
+                    <%- include('components/forms/text-input', { 
+                        id: 'discount', 
+                        name: 'discount', 
+                        label: 'Discount (₹)',
+                        type: 'number',
+                        required: '',
+                        requiredAttr: '',
+                        step: 'step="0.01"',
+                        min: 'min="0"',
+                        placeholder: ''
+                    }) %>
                     
-                    <div>
-                        <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">Amount (₹) *</label>
-                        <input type="number" id="amount" name="amount" required step="0.01" min="0.01"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
+                    <%- include('components/forms/text-input', { 
+                        id: 'taxes', 
+                        name: 'taxes', 
+                        label: 'Taxes (₹)',
+                        type: 'number',
+                        required: '',
+                        requiredAttr: '',
+                        step: 'step="0.01"',
+                        min: 'min="0"',
+                        placeholder: ''
+                    }) %>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="discount" class="block text-sm font-medium text-gray-700 mb-1">Discount (₹)</label>
-                        <input type="number" id="discount" name="discount" step="0.01" min="0" value="0"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
+                    <%- include('components/forms/text-input', { 
+                        id: 'ewayBillNumber', 
+                        name: 'ewayBillNumber', 
+                        label: 'eWay Bill Number',
+                        type: 'text',
+                        required: '',
+                        requiredAttr: '',
+                        step: '',
+                        min: '',
+                        placeholder: ''
+                    }) %>
                     
-                    <div>
-                        <label for="taxes" class="block text-sm font-medium text-gray-700 mb-1">Taxes (₹)</label>
-                        <input type="number" id="taxes" name="taxes" step="0.01" min="0" value="0"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
+                    <%- include('components/forms/text-input', { 
+                        id: 'ewayBillDate', 
+                        name: 'ewayBillDate', 
+                        label: 'eWay Bill Date',
+                        type: 'date',
+                        required: '',
+                        requiredAttr: '',
+                        step: '',
+                        min: '',
+                        placeholder: ''
+                    }) %>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="ewayBillNumber" class="block text-sm font-medium text-gray-700 mb-1">eWay Bill Number</label>
-                        <input type="text" id="ewayBillNumber" name="ewayBillNumber"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    
-                    <div>
-                        <label for="ewayBillDate" class="block text-sm font-medium text-gray-700 mb-1">eWay Bill Date</label>
-                        <input type="date" id="ewayBillDate" name="ewayBillDate"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                </div>
-
-                <div id="errorMessages" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded"></div>
-                <div id="successMessage" class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded"></div>
+                <%- include('components/ui/alert', { 
+                    id: 'errorMessages',
+                    bgColor: 'bg-red-50',
+                    borderColor: 'border-red-200',
+                    textColor: 'text-red-700'
+                }) %>
+                
+                <%- include('components/ui/alert', { 
+                    id: 'successMessage',
+                    bgColor: 'bg-green-50',
+                    borderColor: 'border-green-200',
+                    textColor: 'text-green-700'
+                }) %>
 
                 <div class="flex gap-4 pt-4">
                     <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded">
@@ -154,43 +166,35 @@
     </div>
 
     <!-- Scripts -->
-    <script src="assets/lib/sql-wasm.js"></script>
-    <script src="assets/lib/html2canvas.min.js"></script>
-    <script src="assets/lib/jspdf.umd.min.js"></script>
+    <script src="./assets/lib/sql-wasm.js"></script>
+    <script src="./assets/lib/html2canvas.min.js"></script>
+    <script src="./assets/lib/jspdf.umd.min.js"></script>
     
-    <!-- Main application initialization -->
     <script type="module">
-      import { APP_VERSION } from './assets/js/version.js';
-      
-      // Dynamic imports with version for cache busting
-      const AuthManager = (await import(`./assets/js/auth.js?v=${APP_VERSION}`)).default;
-      const UIController = (await import(`./assets/js/ui-controller.js?v=${APP_VERSION}`)).default;
-      const CityDropdown = (await import(`./assets/js/city-dropdown.js?v=${APP_VERSION}`)).default;
+        import { APP_VERSION } from './assets/js/version.js';
+        
+        const AuthManager = (await import(`./assets/js/auth.js?v=${APP_VERSION}`)).default;
+        const UIController = (await import(`./assets/js/ui-controller.js?v=${APP_VERSION}`)).default;
+        const CityDropdown = (await import(`./assets/js/city-dropdown.js?v=${APP_VERSION}`)).default;
 
-      // Check authentication on page load
-      async function checkAuth() {
-        const authManager = new AuthManager();
-        await authManager.initialize();
+        async function init() {
+            const authManager = new AuthManager();
+            await authManager.initialize();
 
-        // Check if user is authenticated
-        if (!authManager.isAuthenticated()) {
-          // Redirect to login page if not authenticated
-          window.location.href = 'login.html';
-          return;
+            if (!authManager.isAuthenticated()) {
+                window.location.href = './login.html';
+                return;
+            }
+
+            const uiController = new UIController();
+            await uiController.init();
+
+            const cityDropdown = new CityDropdown();
+            cityDropdown.init('origin', 'originDropdown');
+            cityDropdown.init('destination', 'destinationDropdown');
         }
 
-        // User is authenticated, initialize UI controller
-        const uiController = new UIController();
-        await uiController.init();
-
-        // Initialize city dropdowns
-        const cityDropdown = new CityDropdown();
-        cityDropdown.init('origin', 'originDropdown');
-        cityDropdown.init('destination', 'destinationDropdown');
-      }
-
-      // Run authentication check when page loads
-      checkAuth();
+        init();
     </script>
 </body>
 </html>

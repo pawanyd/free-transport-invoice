@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>List Bilty / Invoices - Transport Invoice Management System</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>List Documents - Transport Invoice Management System</title>
+    <link rel="stylesheet" href="./assets/css/styles.css">
     <style>
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
@@ -21,7 +21,6 @@
             animation: fadeOut 0.3s ease-out;
         }
         
-        /* Ensure table layout is fixed and columns have proper spacing */
         #recordsTable table {
             table-layout: auto;
             width: 100%;
@@ -31,7 +30,6 @@
             white-space: nowrap;
         }
         
-        /* Allow goods description to wrap */
         #recordsTable td:nth-child(4) {
             white-space: normal;
             max-width: 200px;
@@ -40,63 +38,23 @@
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div id="app" class="container mx-auto px-4 py-8">
-        <!-- Header with Navigation -->
-        <header class="bg-white shadow-md rounded-lg p-6 mb-6">
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-2xl font-bold text-gray-800">Transport Invoice Management System</h1>
-                <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
-                    Logout
-                </button>
-            </div>
-            
-            <!-- Navigation Menu -->
-            <nav class="border-t pt-4">
-                <ul class="flex gap-4">
-                    <li>
-                        <a href="index.html" class="text-gray-600 hover:text-blue-600 font-medium">
-                            Create New
-                        </a>
-                    </li>
-                    <li>
-                        <a href="list-documents.html" class="text-blue-600 font-bold border-b-2 border-blue-600">
-                            List Bilty / Invoices
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </header>
+        <%- include('components/layout/header', { activePage: 'list' }) %>
 
         <main class="bg-white shadow-md rounded-lg p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-semibold">All Freight Records</h2>
-                <div class="flex gap-2">
-                    <input type="text" id="searchInput" placeholder="Search by origin, destination..." 
-                           class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button id="refreshBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-                        Refresh
-                    </button>
-                </div>
-            </div>
+            <%- include('components/ui/search-bar', { 
+                title: 'All Freight Records',
+                placeholder: 'Search by origin, destination...'
+            }) %>
 
-            <!-- Loading indicator -->
-            <div id="loadingIndicator" class="text-center py-8 hidden">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                <p class="text-gray-600">Loading records...</p>
-            </div>
+            <%- include('components/ui/loading-indicator', { message: 'Loading records...' }) %>
 
-            <!-- Empty state -->
-            <div id="emptyState" class="text-center py-12 hidden">
-                <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                <h3 class="text-lg font-semibold text-gray-700 mb-2">No Records Found</h3>
-                <p class="text-gray-500 mb-4">You haven't created any freight records yet.</p>
-                <a href="index.html" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded inline-block">
-                    Create New Record
-                </a>
-            </div>
+            <%- include('components/ui/empty-state', { 
+                title: 'No Records Found',
+                message: 'You haven\'t created any freight records yet.',
+                actionUrl: './index.html',
+                actionText: 'Create New Record'
+            }) %>
 
-            <!-- Records table -->
             <div id="recordsTable" class="hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
@@ -113,77 +71,24 @@
                             </tr>
                         </thead>
                         <tbody id="recordsTableBody" class="bg-white divide-y divide-gray-200">
-                            <!-- Records will be inserted here -->
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Pagination Controls -->
-                <div id="paginationControls" class="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm text-gray-700">
-                            Showing <span id="recordsFrom" class="font-semibold">0</span> to 
-                            <span id="recordsTo" class="font-semibold">0</span> of 
-                            <span id="recordsTotal" class="font-semibold">0</span> records
-                        </span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button id="firstPageBtn" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
-                            </svg>
-                        </button>
-                        <button id="prevPageBtn" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                            </svg>
-                        </button>
-                        <span class="text-sm text-gray-700">
-                            Page <span id="currentPage" class="font-semibold">1</span> of 
-                            <span id="totalPages" class="font-semibold">1</span>
-                        </span>
-                        <button id="nextPageBtn" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                        </button>
-                        <button id="lastPageBtn" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+                <%- include('components/ui/pagination') %>
             </div>
         </main>
     </div>
 
-    <!-- Document Preview Modal -->
-    <div id="previewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
-                <h3 class="text-lg font-semibold">Document Preview</h3>
-                <button id="closeModal" class="text-gray-500 hover:text-gray-700">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-            <div id="modalContent" class="p-6">
-                <!-- Document content will be inserted here -->
-            </div>
-        </div>
-    </div>
+    <%- include('components/ui/modal') %>
 
-    <!-- Scripts -->
-    <script src="assets/lib/sql-wasm.js"></script>
-    <script src="assets/lib/html2canvas.min.js"></script>
-    <script src="assets/lib/jspdf.umd.min.js"></script>
+    <script src="./assets/lib/sql-wasm.js"></script>
+    <script src="./assets/lib/html2canvas.min.js"></script>
+    <script src="./assets/lib/jspdf.umd.min.js"></script>
     
     <script type="module">
       import { APP_VERSION } from './assets/js/version.js';
       
-      // Dynamic imports with version for cache busting
       const AuthManager = (await import(`./assets/js/auth.js?v=${APP_VERSION}`)).default;
       const DataStoreManager = (await import(`./assets/js/datastore.js?v=${APP_VERSION}`)).default;
       const { DocumentGenerator } = await import(`./assets/js/generator.js?v=${APP_VERSION}`);
@@ -202,24 +107,19 @@
         }
 
         async init() {
-          // Check authentication
           await this.authManager.initialize();
           if (!this.authManager.isAuthenticated()) {
-            window.location.href = 'login.html';
+            window.location.href = './login.html';
             return;
           }
 
-          // Initialize data store
           const initResult = await this.dataStore.initialize();
           if (!initResult.success) {
             this.showError('Failed to initialize database');
             return;
           }
 
-          // Set up event listeners
           this.setupEventListeners();
-
-          // Load records
           await this.loadRecords();
         }
 
@@ -229,7 +129,6 @@
           document.getElementById('searchInput')?.addEventListener('input', (e) => this.handleSearch(e.target.value));
           document.getElementById('closeModal')?.addEventListener('click', () => this.closeModal());
           
-          // Pagination event listeners
           document.getElementById('firstPageBtn')?.addEventListener('click', () => this.goToPage(1));
           document.getElementById('prevPageBtn')?.addEventListener('click', () => this.goToPage(this.currentPage - 1));
           document.getElementById('nextPageBtn')?.addEventListener('click', () => this.goToPage(this.currentPage + 1));
@@ -241,7 +140,6 @@
           const emptyState = document.getElementById('emptyState');
           const recordsTable = document.getElementById('recordsTable');
 
-          // Show loading
           loadingIndicator?.classList.remove('hidden');
           emptyState?.classList.add('hidden');
           recordsTable?.classList.add('hidden');
@@ -250,7 +148,7 @@
             const userId = this.authManager.getUserId();
             this.allRecords = this.dataStore.getUserFreightRecords(userId);
             this.filteredRecords = [...this.allRecords];
-            this.currentPage = 1; // Reset to first page
+            this.currentPage = 1;
 
             loadingIndicator?.classList.add('hidden');
 
@@ -292,14 +190,12 @@
           const startRecord = (this.currentPage - 1) * this.recordsPerPage + 1;
           const endRecord = Math.min(this.currentPage * this.recordsPerPage, this.filteredRecords.length);
 
-          // Update text
           document.getElementById('currentPage').textContent = this.currentPage;
           document.getElementById('totalPages').textContent = totalPages;
           document.getElementById('recordsFrom').textContent = this.filteredRecords.length > 0 ? startRecord : 0;
           document.getElementById('recordsTo').textContent = endRecord;
           document.getElementById('recordsTotal').textContent = this.filteredRecords.length;
 
-          // Update button states
           const firstPageBtn = document.getElementById('firstPageBtn');
           const prevPageBtn = document.getElementById('prevPageBtn');
           const nextPageBtn = document.getElementById('nextPageBtn');
@@ -373,11 +269,10 @@
             );
           }
 
-          this.currentPage = 1; // Reset to first page on search
+          this.currentPage = 1;
           this.renderRecords();
           this.updatePaginationControls();
 
-          // Show/hide empty state
           const emptyState = document.getElementById('emptyState');
           const recordsTable = document.getElementById('recordsTable');
           
@@ -416,7 +311,6 @@
           const record = this.allRecords.find(r => r.id === recordId);
           if (!record) return;
 
-          // Show loading indicator
           const loadingDiv = this.showLoadingOverlay('Generating Bilty PDF...');
 
           try {
@@ -440,7 +334,6 @@
           const record = this.allRecords.find(r => r.id === recordId);
           if (!record) return;
 
-          // Show loading indicator
           const loadingDiv = this.showLoadingOverlay('Generating Invoice PDF...');
 
           try {
@@ -478,7 +371,6 @@
             </div>
           `;
 
-          // Add download handler
           document.getElementById('downloadFromModal')?.addEventListener('click', async () => {
             const type = title.toLowerCase();
             const record = this.allRecords.find(r => r.id === recordId);
@@ -501,7 +393,7 @@
 
         handleLogout() {
           this.authManager.logout();
-          window.location.href = 'login.html';
+          window.location.href = './login.html';
         }
 
         showLoadingOverlay(message = 'Loading...') {
@@ -561,9 +453,8 @@
         }
       }
 
-      // Initialize
       const listController = new ListController();
-      window.listController = listController; // Make available globally for onclick handlers
+      window.listController = listController;
       listController.init();
     </script>
 </body>
