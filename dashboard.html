@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Transport Invoice Management System</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        .stat-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8">
+        <!-- Header with Navigation -->
+        <header class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-2xl font-bold text-gray-800">Transport Invoice Management System</h1>
+                <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded no-print">
+                    Logout
+                </button>
+            </div>
+            
+            <!-- Navigation Menu -->
+            <nav class="border-t pt-4">
+                <ul class="flex gap-4">
+                    <li>
+                        <a href="index.html" class="text-gray-600 hover:text-blue-600 font-medium">
+                            Create New
+                        </a>
+                    </li>
+                    <li>
+                        <a href="list-documents.html" class="text-gray-600 hover:text-blue-600 font-medium">
+                            List Bilty / Invoices
+                        </a>
+                    </li>
+                    <li>
+                        <a href="dashboard.html" class="text-blue-600 font-bold border-b-2 border-blue-600">
+                            Dashboard
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Date Range Filter -->
+            <div class="bg-white shadow-md rounded-lg p-6 mb-6 no-print">
+                <div class="flex flex-wrap items-center gap-4">
+                    <h2 class="text-lg font-semibold">Dashboard</h2>
+                    <div class="flex-1"></div>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <label class="text-sm font-medium text-gray-700">Period:</label>
+                        <select id="periodSelect" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="all">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month" selected>This Month</option>
+                            <option value="year">This Year</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                        <div id="customDateRange" class="hidden flex gap-2">
+                            <input type="date" id="startDate" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="date" id="endDate" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button id="refreshBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Statistics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <!-- Total Freight Count -->
+                <div class="stat-card bg-white shadow-md rounded-lg p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Freight</p>
+                            <p id="totalFreight" class="text-3xl font-bold text-gray-900 mt-2">0</p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full p-3">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Revenue -->
+                <div class="stat-card bg-white shadow-md rounded-lg p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Revenue</p>
+                            <p id="totalRevenue" class="text-3xl font-bold text-green-600 mt-2">₹0</p>
+                        </div>
+                        <div class="bg-green-100 rounded-full p-3">
+                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Weight -->
+                <div class="stat-card bg-white shadow-md rounded-lg p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Weight</p>
+                            <p id="totalWeight" class="text-3xl font-bold text-purple-600 mt-2">0 kg</p>
+                        </div>
+                        <div class="bg-purple-100 rounded-full p-3">
+                            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Average Amount -->
+                <div class="stat-card bg-white shadow-md rounded-lg p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Avg Amount</p>
+                            <p id="avgAmount" class="text-3xl font-bold text-orange-600 mt-2">₹0</p>
+                        </div>
+                        <div class="bg-orange-100 rounded-full p-3">
+                            <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Revenue Trend Chart -->
+                <div class="bg-white shadow-md rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Revenue Trend</h3>
+                    <div class="chart-container">
+                        <canvas id="revenueTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Freight Count Trend Chart -->
+                <div class="bg-white shadow-md rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Freight Count Trend</h3>
+                    <div class="chart-container">
+                        <canvas id="freightCountChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 2 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Top Routes Chart -->
+                <div class="bg-white shadow-md rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Top 10 Routes</h3>
+                    <div class="chart-container" style="height: 400px;">
+                        <canvas id="topRoutesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Weight Distribution Chart -->
+                <div class="bg-white shadow-md rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Weight Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="weightDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Routes Table -->
+            <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+                <h3 class="text-lg font-semibold mb-4">Top Routes Details</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Revenue</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Weight</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topRoutesTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Routes will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="bg-white shadow-md rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
+                <div id="recentActivity" class="space-y-3">
+                    <!-- Recent records will be inserted here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/lib/sql-wasm.js"></script>
+    
+    <script type="module">
+      import { APP_VERSION } from './assets/js/version.js';
+      
+      // Dynamic imports with version for cache busting
+      const AuthManager = (await import(`./assets/js/auth.js?v=${APP_VERSION}`)).default;
+      const DataStoreManager = (await import(`./assets/js/datastore.js?v=${APP_VERSION}`)).default;
+
+      class DashboardController {
+        constructor() {
+          this.authManager = new AuthManager();
+          this.dataStore = new DataStoreManager();
+          this.allRecords = [];
+          this.filteredRecords = [];
+          this.charts = {};
+        }
+
+        async init() {
+          // Check authentication
+          await this.authManager.initialize();
+          if (!this.authManager.isAuthenticated()) {
+            window.location.href = 'login.html';
+            return;
+          }
+
+          // Initialize data store
+          const initResult = await this.dataStore.initialize();
+          if (!initResult.success) {
+            alert('Failed to initialize database');
+            return;
+          }
+
+          // Set up event listeners
+          this.setupEventListeners();
+
+          // Load dashboard data
+          await this.loadDashboard();
+        }
+
+        setupEventListeners() {
+          document.getElementById('logoutBtn')?.addEventListener('click', () => this.handleLogout());
+          document.getElementById('refreshBtn')?.addEventListener('click', () => this.loadDashboard());
+          document.getElementById('periodSelect')?.addEventListener('change', (e) => this.handlePeriodChange(e.target.value));
+          document.getElementById('startDate')?.addEventListener('change', () => this.loadDashboard());
+          document.getElementById('endDate')?.addEventListener('change', () => this.loadDashboard());
+        }
+
+        handlePeriodChange(period) {
+          const customDateRange = document.getElementById('customDateRange');
+          if (period === 'custom') {
+            customDateRange?.classList.remove('hidden');
+          } else {
+            customDateRange?.classList.add('hidden');
+            this.loadDashboard();
+          }
+        }
+
+        async loadDashboard() {
+          try {
+            const userId = this.authManager.getUserId();
+            this.allRecords = this.dataStore.getUserFreightRecords(userId);
+            
+            // Apply period filter
+            this.filteredRecords = this.filterByPeriod(this.allRecords);
+
+            // Update statistics
+            this.updateStatistics();
+
+            // Update charts
+            this.updateCharts();
+
+            // Update tables
+            this.updateTopRoutesTable();
+            this.updateRecentActivity();
+
+          } catch (error) {
+            console.error('Failed to load dashboard:', error);
+            alert('Failed to load dashboard data');
+          }
+        }
+
+        filterByPeriod(records) {
+          const period = document.getElementById('periodSelect')?.value;
+          const now = new Date();
+          let startDate, endDate;
+
+          switch (period) {
+            case 'today':
+              startDate = new Date(now.setHours(0, 0, 0, 0));
+              endDate = new Date(now.setHours(23, 59, 59, 999));
+              break;
+            case 'week':
+              startDate = new Date(now.setDate(now.getDate() - now.getDay()));
+              startDate.setHours(0, 0, 0, 0);
+              endDate = new Date();
+              break;
+            case 'month':
+              startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+              endDate = new Date();
+              break;
+            case 'year':
+              startDate = new Date(now.getFullYear(), 0, 1);
+              endDate = new Date();
+              break;
+            case 'custom':
+              const startInput = document.getElementById('startDate')?.value;
+              const endInput = document.getElementById('endDate')?.value;
+              if (startInput) startDate = new Date(startInput);
+              if (endInput) endDate = new Date(endInput);
+              if (endDate) endDate.setHours(23, 59, 59, 999);
+              break;
+            default: // 'all'
+              return records;
+          }
+
+          return records.filter(record => {
+            const recordDate = new Date(record.createdAt);
+            if (startDate && recordDate < startDate) return false;
+            if (endDate && recordDate > endDate) return false;
+            return true;
+          });
+        }
+
+        updateStatistics() {
+          const totalFreight = this.filteredRecords.length;
+          const totalRevenue = this.filteredRecords.reduce((sum, r) => sum + (r.amount - (r.discount || 0) + (r.taxes || 0)), 0);
+          const totalWeight = this.filteredRecords.reduce((sum, r) => sum + r.weight, 0);
+          const avgAmount = totalFreight > 0 ? totalRevenue / totalFreight : 0;
+
+          document.getElementById('totalFreight').textContent = totalFreight.toLocaleString();
+          document.getElementById('totalRevenue').textContent = '₹' + totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+          document.getElementById('totalWeight').textContent = totalWeight.toLocaleString('en-IN', { maximumFractionDigits: 2 }) + ' kg';
+          document.getElementById('avgAmount').textContent = '₹' + avgAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+        }
+
+        updateCharts() {
+          this.updateRevenueTrendChart();
+          this.updateFreightCountChart();
+          this.updateTopRoutesChart();
+          this.updateWeightDistributionChart();
+        }
+
+        updateRevenueTrendChart() {
+          const ctx = document.getElementById('revenueTrendChart');
+          if (!ctx) return;
+
+          // Group by date
+          const revenueByDate = {};
+          this.filteredRecords.forEach(record => {
+            const date = new Date(record.createdAt).toLocaleDateString('en-IN');
+            const revenue = record.amount - (record.discount || 0) + (record.taxes || 0);
+            revenueByDate[date] = (revenueByDate[date] || 0) + revenue;
+          });
+
+          const sortedDates = Object.keys(revenueByDate).sort((a, b) => new Date(a) - new Date(b));
+          const revenues = sortedDates.map(date => revenueByDate[date]);
+
+          if (this.charts.revenueTrend) {
+            this.charts.revenueTrend.destroy();
+          }
+
+          this.charts.revenueTrend = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: sortedDates,
+              datasets: [{
+                label: 'Revenue (₹)',
+                data: revenues,
+                borderColor: 'rgb(34, 197, 94)',
+                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                tension: 0.4,
+                fill: true
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: function(value) {
+                      return '₹' + value.toLocaleString();
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        updateFreightCountChart() {
+          const ctx = document.getElementById('freightCountChart');
+          if (!ctx) return;
+
+          // Group by date
+          const countByDate = {};
+          this.filteredRecords.forEach(record => {
+            const date = new Date(record.createdAt).toLocaleDateString('en-IN');
+            countByDate[date] = (countByDate[date] || 0) + 1;
+          });
+
+          const sortedDates = Object.keys(countByDate).sort((a, b) => new Date(a) - new Date(b));
+          const counts = sortedDates.map(date => countByDate[date]);
+
+          if (this.charts.freightCount) {
+            this.charts.freightCount.destroy();
+          }
+
+          this.charts.freightCount = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: sortedDates,
+              datasets: [{
+                label: 'Freight Count',
+                data: counts,
+                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                borderColor: 'rgb(59, 130, 246)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    stepSize: 1
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        updateTopRoutesChart() {
+          const ctx = document.getElementById('topRoutesChart');
+          if (!ctx) return;
+
+          const routeStats = this.calculateRouteStats();
+          const topRoutes = routeStats.slice(0, 10);
+
+          if (this.charts.topRoutes) {
+            this.charts.topRoutes.destroy();
+          }
+
+          this.charts.topRoutes = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: topRoutes.map(r => r.route),
+              datasets: [{
+                label: 'Freight Count',
+                data: topRoutes.map(r => r.count),
+                backgroundColor: 'rgba(168, 85, 247, 0.8)',
+                borderColor: 'rgb(168, 85, 247)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              indexAxis: 'y',
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false
+                }
+              },
+              scales: {
+                x: {
+                  beginAtZero: true,
+                  ticks: {
+                    stepSize: 1
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        updateWeightDistributionChart() {
+          const ctx = document.getElementById('weightDistributionChart');
+          if (!ctx) return;
+
+          // Create weight ranges
+          const ranges = [
+            { label: '0-100 kg', min: 0, max: 100 },
+            { label: '100-500 kg', min: 100, max: 500 },
+            { label: '500-1000 kg', min: 500, max: 1000 },
+            { label: '1000-5000 kg', min: 1000, max: 5000 },
+            { label: '5000+ kg', min: 5000, max: Infinity }
+          ];
+
+          const distribution = ranges.map(range => {
+            return this.filteredRecords.filter(r => r.weight >= range.min && r.weight < range.max).length;
+          });
+
+          if (this.charts.weightDistribution) {
+            this.charts.weightDistribution.destroy();
+          }
+
+          this.charts.weightDistribution = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: ranges.map(r => r.label),
+              datasets: [{
+                data: distribution,
+                backgroundColor: [
+                  'rgba(59, 130, 246, 0.8)',
+                  'rgba(34, 197, 94, 0.8)',
+                  'rgba(251, 146, 60, 0.8)',
+                  'rgba(168, 85, 247, 0.8)',
+                  'rgba(239, 68, 68, 0.8)'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                }
+              }
+            }
+          });
+        }
+
+        calculateRouteStats() {
+          const routeMap = {};
+
+          this.filteredRecords.forEach(record => {
+            const route = `${record.origin} → ${record.destination}`;
+            if (!routeMap[route]) {
+              routeMap[route] = {
+                route: route,
+                count: 0,
+                totalRevenue: 0,
+                totalWeight: 0
+              };
+            }
+
+            routeMap[route].count++;
+            routeMap[route].totalRevenue += record.amount - (record.discount || 0) + (record.taxes || 0);
+            routeMap[route].totalWeight += record.weight;
+          });
+
+          return Object.values(routeMap)
+            .sort((a, b) => b.count - a.count);
+        }
+
+        updateTopRoutesTable() {
+          const tbody = document.getElementById('topRoutesTableBody');
+          if (!tbody) return;
+
+          const routeStats = this.calculateRouteStats().slice(0, 10);
+
+          tbody.innerHTML = routeStats.map(route => `
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${this.escapeHtml(route.route)}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${route.count}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">₹${route.totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${route.totalWeight.toLocaleString('en-IN', { maximumFractionDigits: 2 })} kg</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">₹${(route.totalRevenue / route.count).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
+            </tr>
+          `).join('');
+        }
+
+        updateRecentActivity() {
+          const container = document.getElementById('recentActivity');
+          if (!container) return;
+
+          const recentRecords = [...this.filteredRecords]
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .slice(0, 5);
+
+          if (recentRecords.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-center py-4">No recent activity</p>';
+            return;
+          }
+
+          container.innerHTML = recentRecords.map(record => {
+            const date = new Date(record.createdAt).toLocaleString('en-IN');
+            const revenue = record.amount - (record.discount || 0) + (record.taxes || 0);
+            return `
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-gray-900">
+                    ${this.escapeHtml(record.origin)} → ${this.escapeHtml(record.destination)}
+                  </p>
+                  <p class="text-xs text-gray-500">${date}</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm font-semibold text-green-600">₹${revenue.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
+                  <p class="text-xs text-gray-500">${record.weight} kg</p>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        escapeHtml(text) {
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+        }
+
+        handleLogout() {
+          this.authManager.logout();
+          window.location.href = 'login.html';
+        }
+      }
+
+      // Initialize
+      const dashboardController = new DashboardController();
+      dashboardController.init();
+    </script>
+</body>
+</html>

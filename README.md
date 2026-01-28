@@ -10,16 +10,22 @@ A client-side web application for generating professional bilty (consignment not
 - **List & Search**: View all freight records with powerful search functionality
 - **Advanced Filtering**: Filter by date range, amount range, weight range, origin, and destination
 - **Column Sorting**: Sort records by ID, origin, destination, weight, amount, or date
+- **Dashboard & Analytics**: Visual insights with charts and statistics
+  - Total freight count, revenue, weight, and average amount
+  - Revenue and freight count trends over time
+  - Top 10 routes with detailed statistics
+  - Weight distribution analysis
+  - Recent activity feed
+  - Flexible date range filtering (today, week, month, year, custom)
 - **Edit & Delete**: Modify or remove existing freight records with validation
 - **Document Generation**: Create professional bilty and invoice documents
 - **PDF Export**: Download documents as print-ready PDFs
-- **Bulk PDF Export**: Generate PDFs for multiple records at once
 - **CSV Export**: Export all records to CSV/Excel format
 - **Print View**: Print-friendly list view of all records
 - **eWay Bill Integration**: Include eWay bill information in documents
 - **Client-Side Storage**: All data stored locally in your browser using SQLite
 - **Offline Capable**: Works without an internet connection after initial load
-- **Navigation Menu**: Easy navigation between create and list pages
+- **Navigation Menu**: Easy navigation between create, list, and dashboard pages
 
 ## Quick Start
 
@@ -134,7 +140,20 @@ After entering freight details:
 ### 5. Logout
 - Click the "Logout" button in the top right to end your session
 
-### 6. View All Records
+### 6. View Dashboard
+- Click "Dashboard" in the navigation menu
+- View comprehensive analytics and statistics
+- Select time period: Today, This Week, This Month, This Year, or Custom Range
+- See summary cards for total freight, revenue, weight, and average amount
+- Analyze trends with interactive charts:
+  - Revenue trend over time (line chart)
+  - Freight count trend (bar chart)
+  - Top 10 routes (horizontal bar chart)
+  - Weight distribution (doughnut chart)
+- Review detailed top routes table with count, revenue, weight, and averages
+- Check recent activity feed for latest records
+
+### 7. View All Records
 - Click "List Bilty / Invoices" in the navigation menu
 - View all your freight records in a table
 - Use the search box to filter records by origin, destination, goods, or ID
@@ -145,7 +164,7 @@ After entering freight details:
 - Click ✏️ to edit a record
 - Click 🗑️ to delete a record (with confirmation)
 
-### 7. Advanced Filtering
+### 8. Advanced Filtering
 - Click the "Filters" button to show/hide filter panel
 - Filter by date range (from/to dates)
 - Filter by amount range (min/max)
@@ -154,18 +173,17 @@ After entering freight details:
 - Click "Apply Filters" to filter records
 - Click "Clear Filters" to reset all filters
 
-### 8. Export & Print
+### 9. Export & Print
 - **Export CSV**: Download all filtered records as CSV file for Excel
-- **Bulk PDF**: Generate PDFs for all filtered records (bilty + invoice for each)
 - **Print**: Print the current list view with all filtered records
 
-### 9. Edit Records
+### 10. Edit Records
 - Click the edit icon (✏️) on any record
 - Modify the freight details in the modal form
 - Click "Save Changes" to update
 - Changes are validated and saved immediately
 
-### 10. Delete Records
+### 11. Delete Records
 - Click the delete icon (🗑️) on any record
 - Confirm the deletion in the dialog
 - Record and associated document history will be permanently removed
