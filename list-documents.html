@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>List Bilty / Invoices - Transport Invoice Management System</title>
     <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/mobile-responsive.css">
     <style>
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
@@ -126,7 +127,7 @@
             <div class="mb-6 no-print">
                 <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
                     <h2 class="text-xl font-semibold">All Freight Records</h2>
-                    <div class="flex flex-wrap gap-2">
+                    <div class="toolbar-buttons flex flex-wrap gap-2">
                         <button id="toggleFiltersBtn" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
@@ -235,7 +236,7 @@
 
             <!-- Records table -->
             <div id="recordsTable" class="hidden">
-                <div class="overflow-x-auto">
+                <div class="table-scroll-wrapper overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>

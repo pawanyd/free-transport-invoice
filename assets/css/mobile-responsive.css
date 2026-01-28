@@ -1,0 +1,379 @@
+/* Mobile Responsiveness Enhancements */
+
+/* Base mobile optimizations */
+@media (max-width: 768px) {
+  /* Touch-friendly buttons - minimum 44x44px touch target */
+  button,
+  a.button,
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px 16px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Form inputs - prevent zoom on iOS */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 16px !important;
+    padding: 12px;
+  }
+
+  /* Container padding for mobile */
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  /* Header adjustments */
+  header h1 {
+    font-size: 1.25rem;
+  }
+
+  /* Navigation - stack vertically on mobile */
+  nav ul {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  nav ul li a {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  /* Responsive tables */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  /* Card layouts */
+  .stat-card,
+  .card {
+    margin-bottom: 12px;
+  }
+
+  /* Modal adjustments */
+  .modal-content {
+    max-height: 85vh;
+    margin: 16px;
+  }
+
+  /* Grid adjustments */
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Toolbar buttons - wrap and stack */
+  .toolbar-buttons {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .toolbar-buttons button {
+    flex: 1 1 auto;
+    min-width: 120px;
+  }
+
+  /* Hide less important columns on mobile */
+  .hide-mobile {
+    display: none !important;
+  }
+
+  /* Compact spacing */
+  .mobile-compact {
+    padding: 8px !important;
+  }
+
+  /* Full width buttons on mobile */
+  .mobile-full-width {
+    width: 100% !important;
+  }
+
+  /* Sticky header on mobile */
+  .mobile-sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  /* 2-column grid for tablets */
+  .grid-responsive {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets */
+  button,
+  a,
+  input,
+  select {
+    min-height: 44px;
+  }
+
+  /* Remove hover effects on touch devices */
+  button:hover,
+  a:hover {
+    transform: none;
+  }
+
+  /* Add active state for touch feedback */
+  button:active,
+  a:active {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+
+  /* Improve scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  /* Reduce vertical spacing in landscape */
+  .py-8 {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  .mb-6 {
+    margin-bottom: 1rem !important;
+  }
+
+  /* Compact header */
+  header {
+    padding: 12px !important;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 375px) {
+  /* Extra compact for small screens */
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  header h1 {
+    font-size: 1.125rem;
+  }
+
+  button {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  /* Stack action buttons vertically */
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-buttons button {
+    width: 100%;
+  }
+}
+
+/* Accessibility - high contrast mode */
+@media (prefers-contrast: high) {
+  button {
+    border: 2px solid currentColor;
+  }
+
+  input,
+  select,
+  textarea {
+    border: 2px solid #000;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+
+  .bg-white {
+    background-color: #2d2d2d !important;
+  }
+
+  .bg-gray-50 {
+    background-color: #3a3a3a !important;
+  }
+
+  .bg-gray-100 {
+    background-color: #2d2d2d !important;
+  }
+
+  .text-gray-900 {
+    color: #ffffff !important;
+  }
+
+  .text-gray-700 {
+    color: #e0e0e0 !important;
+  }
+
+  .text-gray-600 {
+    color: #b0b0b0 !important;
+  }
+
+  .border-gray-200,
+  .border-gray-300 {
+    border-color: #4a4a4a !important;
+  }
+
+  input,
+  select,
+  textarea {
+    background-color: #3a3a3a;
+    color: #ffffff;
+    border-color: #4a4a4a;
+  }
+}
+
+/* Mobile-specific table styles */
+@media (max-width: 768px) {
+  /* Card-style table for mobile */
+  .mobile-card-table {
+    display: block;
+  }
+
+  .mobile-card-table thead {
+    display: none;
+  }
+
+  .mobile-card-table tbody {
+    display: block;
+  }
+
+  .mobile-card-table tr {
+    display: block;
+    margin-bottom: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+    background: white;
+  }
+
+  .mobile-card-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border: none;
+  }
+
+  .mobile-card-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    margin-right: 12px;
+  }
+
+  /* Horizontal scroll for complex tables */
+  .table-scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+
+  .table-scroll-wrapper table {
+    min-width: 600px;
+  }
+}
+
+/* iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* Fix iOS input zoom */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  /* Fix iOS button appearance */
+  button,
+  input[type="submit"],
+  input[type="button"] {
+    -webkit-appearance: none;
+    border-radius: 8px;
+  }
+
+  /* Fix iOS select appearance */
+  select {
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 32px;
+  }
+}
+
+/* Android specific fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
+  /* Fix Android input appearance */
+  input,
+  select,
+  textarea {
+    -webkit-appearance: none;
+  }
+}
+
+/* Print optimizations */
+@media print {
+  /* Hide mobile-specific elements */
+  .mobile-only {
+    display: none !important;
+  }
+
+  /* Ensure proper page breaks */
+  .page-break {
+    page-break-after: always;
+  }
+
+  /* Optimize table printing */
+  table {
+    page-break-inside: avoid;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+}

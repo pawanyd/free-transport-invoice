@@ -23,6 +23,18 @@ A client-side web application for generating professional bilty (consignment not
   - Create custom fields for freight details (text, number, date, textarea, dropdown)
   - Flexible field types with validation
   - Manage multiple businesses from one account
+- **Backup & Restore**: Protect your data
+  - Export entire database to JSON format
+  - Import/restore from backup files
+  - Auto-backup reminders (configurable intervals)
+  - Database statistics and size tracking
+- **Mobile Responsive**: Optimized for all devices
+  - Touch-friendly buttons (44x44px minimum)
+  - Mobile-optimized forms (prevents zoom on iOS)
+  - Responsive tables with horizontal scroll
+  - Adaptive layouts for phone, tablet, and desktop
+  - Dark mode support
+  - Landscape orientation optimization
 - **Edit & Delete**: Modify or remove existing freight records with validation
 - **Document Generation**: Create professional bilty and invoice documents
 - **PDF Export**: Download documents as print-ready PDFs
