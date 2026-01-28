@@ -4,7 +4,7 @@
  * Increment the version number by 1 for each new deployment
  */
 
-export const APP_VERSION = '1';
+export const APP_VERSION = '2';
 
 /**
  * Get versioned URL for cache busting

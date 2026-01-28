@@ -410,6 +410,92 @@ class DataStoreManager {
   }
 
   /**
+   * Update freight details
+   * Returns: { success: boolean, error?: string }
+   */
+  updateFreightDetails(id, freightData) {
+    if (!this.initialized) {
+      console.error('Attempted to update freight details before database initialization');
+      return { success: false, error: 'Database not initialized' };
+    }
+
+    try {
+      const stmt = this.db.prepare(`
+        UPDATE freight_details SET
+          origin = ?,
+          destination = ?,
+          goods_description = ?,
+          weight = ?,
+          amount = ?,
+          discount = ?,
+          taxes = ?,
+          eway_bill_number = ?,
+          eway_bill_date = ?
+        WHERE id = ? AND user_id = ?
+      `);
+
+      stmt.run([
+        freightData.origin,
+        freightData.destination,
+        freightData.goodsDescription,
+        freightData.weight,
+        freightData.amount,
+        freightData.discount || 0,
+        freightData.taxes || 0,
+        freightData.ewayBillNumber || null,
+        freightData.ewayBillDate || null,
+        id,
+        freightData.userId
+      ]);
+
+      stmt.free();
+
+      this.persistToLocalStorage();
+
+      console.log(`Freight details updated successfully for ID: ${id}`);
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to update freight details:', error);
+      return { success: false, error: `Failed to update data: ${error.message}` };
+    }
+  }
+
+  /**
+   * Delete freight details and associated document history
+   * Returns: { success: boolean, error?: string }
+   */
+  deleteFreightDetails(id, userId) {
+    if (!this.initialized) {
+      console.error('Attempted to delete freight details before database initialization');
+      return { success: false, error: 'Database not initialized' };
+    }
+
+    try {
+      // First delete associated document history
+      const deleteHistoryStmt = this.db.prepare(`
+        DELETE FROM document_history WHERE freight_id = ?
+      `);
+      deleteHistoryStmt.run([id]);
+      deleteHistoryStmt.free();
+
+      // Then delete the freight record
+      const deleteFreightStmt = this.db.prepare(`
+        DELETE FROM freight_details WHERE id = ? AND user_id = ?
+      `);
+      deleteFreightStmt.run([id, userId]);
+      deleteFreightStmt.free();
+
+      this.persistToLocalStorage();
+
+      console.log(`Freight details deleted successfully for ID: ${id}`);
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to delete freight details:', error);
+      return { success: false, error: `Failed to delete data: ${error.message}` };
+    }
+  }
+
+  /**
    * Clear all data (for testing or user data reset)
    */
   clearAllData() {

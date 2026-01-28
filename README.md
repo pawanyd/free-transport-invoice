@@ -8,6 +8,7 @@ A client-side web application for generating professional bilty (consignment not
 - **User Registration**: Create new accounts with username/password validation
 - **Freight Details Entry**: Intuitive form for capturing shipment information
 - **List & Search**: View all freight records with search functionality
+- **Edit & Delete**: Modify or remove existing freight records with validation
 - **Document Generation**: Create professional bilty and invoice documents
 - **PDF Export**: Download documents as print-ready PDFs
 - **eWay Bill Integration**: Include eWay bill information in documents
@@ -134,6 +135,19 @@ After entering freight details:
 - Use the search box to filter records by origin, destination, goods, or ID
 - Click "Bilty" or "Invoice" to preview documents
 - Click 📄 or 📋 icons to download PDFs directly
+- Click ✏️ to edit a record
+- Click 🗑️ to delete a record (with confirmation)
+
+### 7. Edit Records
+- Click the edit icon (✏️) on any record
+- Modify the freight details in the modal form
+- Click "Save Changes" to update
+- Changes are validated and saved immediately
+
+### 8. Delete Records
+- Click the delete icon (🗑️) on any record
+- Confirm the deletion in the dialog
+- Record and associated document history will be permanently removed
 
 ## Browser Compatibility
 
